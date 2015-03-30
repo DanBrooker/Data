@@ -8,3 +8,7 @@ end
 target 'DataTests' do
     pod 'YapDatabase'
 end
+
+target 'Example' do
+    pod 'YapDatabase'
+end

@@ -46,44 +46,50 @@ public class YapStore : Store {
                 
         self.mainThreadConnection = database.newConnection()
         
-//        NSNotificationCenter.defaultCenter().addObserver(self,
-//            selector:"modified:",
-//            name:YapDatabaseModifiedNotification,
-//            object:database)
+        NSNotificationCenter.defaultCenter().addObserver(self,
+            selector:"modified:",
+            name:YapDatabaseModifiedNotification,
+            object:database)
     }
     
     deinit {
-//        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-//    @objc func modified(notification: NSNotification) {
-////        println("delegate: \(delegate)")
-//        if let dict = notification.userInfo {
-//            if let changes = dict["objectChanges"] as? YapSet {
-////                println("\(changes)")
-//                
-//                changes.enumerateObjectsUsingBlock({ change, _ in
-//                    if let change = change as? YapCollectionKey {
-//                        let collection = change.collection
-//                        let key = change.key
-//                        
-////                        self.delegate?.objectUpdated(key, klass: NSClassFromString(collection))
+    @objc func modified(notification: NSNotification) {
+//        println("notification: \(notification)")
+        if let dict = notification.userInfo {
+            if let changes = dict["objectChanges"] as? YapSet {
+//                println("\(changes)")
+                
+                changes.enumerateObjectsUsingBlock({ change, _ in
+                    if let change = change as? YapCollectionKey {
+                        let collection = change.collection
+                        let key = change.key
+                        
+                        if key == nil {
+                            return
+                        }
+                        
+//                        self.delegate?.objectUpdated(key, klass: NSClassFromString(collection))
 //                        NSNotificationCenter.defaultCenter().postNotificationName("dataStoreModified", object: collection, userInfo: ["id": key])
-//                    }
-//                })
-//            } else if let removed = dict["removedKeys"] as? YapSet {
-//                removed.enumerateObjectsUsingBlock({ change, _ in
-//                    if let change = change as? YapCollectionKey {
-//                        let collection = change.collection
-//                        let key = change.key
-////                        self.delegate?.objectDeleted(key, klass: NSClassFromString(collection))
+                        NSNotificationCenter.defaultCenter().postNotificationName("dataStoreModified", object: nil, userInfo: ["id": key])
+                    }
+                })
+            } else if let removed = dict["removedKeys"] as? YapSet {
+                removed.enumerateObjectsUsingBlock({ change, _ in
+                    if let change = change as? YapCollectionKey {
+                        let collection = change.collection
+                        let key = change.key
+//                        self.delegate?.objectDeleted(key, klass: NSClassFromString(collection))
 //                        NSNotificationCenter.defaultCenter().postNotificationName("dataStoreRemoved", object: collection, userInfo: ["id": key])
-//                    }
-//                })
-//            }
-//        }
-////        delegate?.didUpdate()
-//    }
+                        NSNotificationCenter.defaultCenter().postNotificationName("dataStoreRemoved", object: nil, userInfo: ["id": key])
+                    }
+                })
+            }
+        }
+//        delegate?.didUpdate()
+    }
     
     // MARK: READ
     

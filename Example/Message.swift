@@ -1,0 +1,43 @@
+//
+//  Message.swift
+//  Data
+//
+//  Created by Daniel Brooker on 20/03/15.
+//  Copyright (c) 2015 Nocturnal Code. All rights reserved.
+//
+
+import Foundation
+import Data
+
+func generateUID() -> String {
+    var counter = NSUserDefaults.standardUserDefaults().integerForKey("generateCounter")
+    counter++
+    NSUserDefaults.standardUserDefaults().setInteger(counter, forKey: "generateCounter")
+    return "<0x\(counter)>"
+}
+
+class Message : NSObject, Model {
+
+    let uid: String
+    var text: String
+    
+    init(text: String) {
+        self.text = text
+        self.uid = generateUID()
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        self.uid = aDecoder.decodeObjectForKey("uid") as String
+        self.text = aDecoder.decodeObjectForKey("text") as String
+    }
+    
+    func encodeWithCoder(aCoder: NSCoder) {
+        aCoder.encodeObject(uid, forKey: "uid")
+        aCoder.encodeObject(text, forKey: "text")
+    }
+    
+}
+
+func ==(lhs: Message, rhs: Message) -> Bool {
+    return lhs.uid == rhs.uid
+}
