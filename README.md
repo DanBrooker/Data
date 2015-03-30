@@ -1,5 +1,7 @@
 # Data
 
+[![Build Status](https://travis-ci.org/DanBrooker/Data.svg?branch=master)](https://travis-ci.org/DanBrooker/Data)
+
 Data is a Swift framework for working with data models.
 > It uses YapDatabase and not CoreData
 
