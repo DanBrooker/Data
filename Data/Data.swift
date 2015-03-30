@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Nocturnal Code. All rights reserved.
 //
 
+///
 public protocol DataDelegate {
     func beginUpdates()
     func endUpdates()
@@ -14,6 +15,7 @@ public protocol DataDelegate {
     func objectUpdated(indexPaths: [NSIndexPath])
 }
 
+///
 public class Data<T: Model> : CollectionType {
     
     typealias Element = T
@@ -25,11 +27,13 @@ public class Data<T: Model> : CollectionType {
     let query : Query<T>
     let datastore : Store
     
+    ///
     public var delegate : DataDelegate?
     
     var removedProxy: ObserverProxy?
     var modifiedProxy: ObserverProxy?
     
+    ///
     public init(query: Query<T>, store: Store) {
         self.query = query
         self.datastore = store
@@ -40,14 +44,10 @@ public class Data<T: Model> : CollectionType {
     }
     
     func databaseModified(notification: NSNotification) {
-//        println("mod: \(notification)")
         if let info = notification.userInfo {
-//            println("info: \(info)")
             if let id = info["id"] as? String {
-//                println("id \(id)")
                 
                 if let index = find(temporalIds, id) {
-//                    println("don't notify already handled locally")
                     temporalIds.removeAtIndex(index)
                     return
                 }
@@ -55,39 +55,20 @@ public class Data<T: Model> : CollectionType {
                 var obj : T? = datastore.find("\(id)")
                 
                 if let index = find(dataIds, id) {
-                    // update
-                    
-                    // TODO: identify if this is actually an add or an update?
                     if let obj = obj {
-//                        println("obj: obj")
 
                         self.data[index] = obj
-//                        println("delegate \(delegate): updated")
                         delegate?.objectUpdated([NSIndexPath(forRow: index, inSection: 0)])
-                    } else {
-//                        println("delegate \(delegate): added")
-//                        delegate?.objectAdded([NSIndexPath(forRow: index, inSection: 0)])
                     }
                 } else if let obj = obj {
-                    
-                    // should insert?
-                    
+
                     if let filter = query.filter {
                         if !filter(element: obj) {
                             return
                         }
                     }
-//                    
                     self.data.append(obj)
-//                    reapply()
-//
-//                    if let index = find(data, obj) {
-//                        println("delegate \(delegate): added")
-//                        delegate?.objectAdded([NSIndexPath(forRow: index, inSection: 0)])
-//                    }
-                } else {
-//                    println("delegate \(delegate): added")
-//                    delegate?.objectAdded([NSIndexPath(forRow: 0, inSection: 0)])
+
                 }
                 
                 reapply()
@@ -96,33 +77,21 @@ public class Data<T: Model> : CollectionType {
     }
     
     func databaseRemoved(notification: NSNotification) {
-//        println("removed: \(notification)")
         if let info = notification.userInfo {
             if let id = info["id"] as? String {
                 
                 if let index = find(temporalIds, id) {
-//                    println("don't notify already handled locally")
                     temporalIds.removeAtIndex(index)
                     return
                 }
                 
-//                println("removed key: \(id)")
-//                var obj : T? = datastore.find("\(id)")
-                
                 if let index = find(dataIds, id) {
-                    // remove
-//                    if let obj = obj {
-//                        println("obj: obj")
                     
-                        self.data.removeAtIndex(index)
-                        self.dataIds.removeAtIndex(index)
-                    
-//                        println("delegate \(delegate): removed")
-                        delegate?.objectRemoved([NSIndexPath(forRow: index, inSection: 0)])
-//                    }
+                    self.data.removeAtIndex(index)
+                    self.dataIds.removeAtIndex(index)
+                
+                    delegate?.objectRemoved([NSIndexPath(forRow: index, inSection: 0)])
                 }
-                
-                
             }
         }
     }
@@ -138,6 +107,7 @@ public class Data<T: Model> : CollectionType {
     public var endIndex: Int {
         return data.endIndex
     }
+    
     public subscript (index: Int) -> T {
         return data[index]
     }
@@ -146,52 +116,38 @@ public class Data<T: Model> : CollectionType {
         return data.generate()
     }
     
+    ///
     public func append(newElement: T) {
         data.append(newElement)
-//        dataIds.append(newElement.uid)
         temporalIds.append(newElement.uid)
         datastore.add(newElement)
         
         reapply()
-        
-//        if let index = find(data, newElement) {
-//            delegate?.objectAdded([NSIndexPath(forRow: index, inSection: 0)])
-//        }
     }
     
+    ///
     public func appendAll(newElements: [T]) {
         
-//        var indexPaths = [NSIndexPath]()
         for element in newElements {
             data.append(element)
-//            dataIds.append(element.uid)
             temporalIds.append(element.uid)
             datastore.add(element)
-            
-
-            
-//            if let index = find(data, element) {
-//                indexPaths.append(NSIndexPath(forRow: index, inSection: 0))
-//            }
         }
         
         reapply()
-        
-//        if !indexPaths.isEmpty {
-//            delegate?.objectAdded(indexPaths)
-//        }
     }
     
+    ///
     public func removeAtIndex(index: Int) -> T {
         let removed = data.removeAtIndex(index)
-//        dataIds.removeAtIndex(index)
         temporalIds.append(removed.uid)
         datastore.remove(removed)
-//        delegate?.objectRemoved([NSIndexPath(forRow: index, inSection: 0)])
+        
         reapply()
         return removed
     }
     
+    ///
     public func update(element: T) {
         datastore.update(element)
         reapply()
@@ -244,10 +200,12 @@ public class Data<T: Model> : CollectionType {
         dataIds = updatedIds
     }
     
+    ///
     public var isEmpty: Bool {
         return data.count == 0
     }
     
+    ///
     public var count: Int {
         return data.count
     }
@@ -257,15 +215,18 @@ public class Data<T: Model> : CollectionType {
 // MARK: UITableViewDataSource Compat
 extension Data {
     
+    ///
     public func removeAtIndexPath(indexPath: NSIndexPath) {
-        // ignore section, this Data doesn't handle section
+        // ignore section, this Data Type doesn't handle sections
         removeAtIndex(indexPath.row)
     }
     
+    ///
     public subscript(indexPath: NSIndexPath) -> T {
         return data[indexPath.row]
     }
     
+    ///
     public func numberOfRowsInSection(section: Int) -> Int {
         return data.count
     }

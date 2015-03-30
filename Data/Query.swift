@@ -6,45 +6,30 @@
 //  Copyright (c) 2015 Nocturnal Code. All rights reserved.
 //
 
-//public enum QueryResult<T: Model> : CollectionType {
-//    case Empty
-//    case Some(array: [T])
-//    case SomeGroups(groups: [String:[T]])
-//    
-//    public var startIndex: Int {
-//        return data.startIndex
-//    }
-//    
-//    public var endIndex: Int {
-//        return data.endIndex
-//    }
-//    
-//    public subscript (index: Int) -> T {
-//        return data[index]
-//    }
-//    
-//    public func generate() -> IndexingGenerator<[T]> {
-//        switch(self) {
-//        case .Empty:
-//            return [].generate()
-//        case .Some(let array):
-//            return array.generate()
-//        case .SomeGroups(groups: <#[String : [T]]#>)
-//        }
-//        return data.generate()
-//    }
-//}
-
+/// A basic query structure
 public struct Query<T : Model> {
+    
+    /// Where condition
     let filter: ( (element: T) -> Bool )?
-//    let group: ( (element: T) -> (String) )?
+    
+    /// Limit number of results and initial offset
     let window: Range<Int>?
+    
+    /// Sort order
     let order: ( (a: T, b: T) -> Bool )?
 
-    public init(filter: ( (a: T) -> Bool )? = nil, window: Range<Int>? = nil, order: ( (a: T, b: T) -> Bool )? = nil /*, group: ( (a: T) -> (String) )? = nil */) {
+    /**
+        Initializes a new bicycle with the provided parts and specifications.
+    
+        :param: filter Only include data that pass the filter i.e { $0.enabled == true }
+        :param: window Range of data required i.e 1...5 -> location 1, length 5
+        :param: order Set the sorting function i.e { $0.createdAt > $1.createdAt }
+    
+        :returns: A query object.
+     */
+    public init(filter: ( (a: T) -> Bool )? = nil, window: Range<Int>? = nil, order: ( (a: T, b: T) -> Bool )? = nil) {
         self.filter = filter
         self.window = window
-//        self.group = group
         self.order = order
     }
     
@@ -66,30 +51,5 @@ public struct Query<T : Model> {
         }
 
         return array
-//        
-//        if array.isEmpty {
-//            return .Empty
-//        } else if let group = group {
-//            
-//            var hash: [String: [T]] = [:]
-//            for i in array {
-//                let key = group(element: i)
-//                var group = hash[key]
-//                if group == nil {
-//                    group = [T]()
-//                    hash[key] = group
-//                }
-//                group?.append(i)
-//            }
-//            
-//            if let order = order {
-//                for (key, value) in hash {
-//                   hash[key] = value.sorted(order)
-//                }
-//            }
-//            return .SomeGroups(groups: hash)
-//        } else {
-//            
-//        }
     }
 }

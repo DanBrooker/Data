@@ -10,12 +10,8 @@ import YapDatabase
 
 public class YapStore : Store {
     
-//    var delegate: DataStoreDelegate?
-    
     let database: YapDatabase
     let name: String
-    
-//    var relationshipsLookup = [ModelRelationships.Type]()
     
     private let mainThreadConnection: YapDatabaseConnection
     public var connection: YapDatabaseConnection {
@@ -38,12 +34,6 @@ public class YapStore : Store {
         self.name = name
         database = YapDatabase(path: path)
                 
-                //        let relationships = YapDatabaseRelationship()
-                
-                //        if !database.registerExtension(relationships, withName:"relationships") {
-                //            println("Unable to register extension: relationships");
-                //        }
-                
         self.mainThreadConnection = database.newConnection()
         
         NSNotificationCenter.defaultCenter().addObserver(self,
@@ -57,10 +47,8 @@ public class YapStore : Store {
     }
     
     @objc func modified(notification: NSNotification) {
-//        println("notification: \(notification)")
         if let dict = notification.userInfo {
             if let changes = dict["objectChanges"] as? YapSet {
-//                println("\(changes)")
                 
                 changes.enumerateObjectsUsingBlock({ change, _ in
                     if let change = change as? YapCollectionKey {
@@ -70,9 +58,6 @@ public class YapStore : Store {
                         if key == nil {
                             return
                         }
-                        
-//                        self.delegate?.objectUpdated(key, klass: NSClassFromString(collection))
-//                        NSNotificationCenter.defaultCenter().postNotificationName("dataStoreModified", object: collection, userInfo: ["id": key])
                         NSNotificationCenter.defaultCenter().postNotificationName("dataStoreModified", object: nil, userInfo: ["id": key])
                     }
                 })
@@ -81,14 +66,11 @@ public class YapStore : Store {
                     if let change = change as? YapCollectionKey {
                         let collection = change.collection
                         let key = change.key
-//                        self.delegate?.objectDeleted(key, klass: NSClassFromString(collection))
-//                        NSNotificationCenter.defaultCenter().postNotificationName("dataStoreRemoved", object: collection, userInfo: ["id": key])
                         NSNotificationCenter.defaultCenter().postNotificationName("dataStoreRemoved", object: nil, userInfo: ["id": key])
                     }
                 })
             }
         }
-//        delegate?.didUpdate()
     }
     
     // MARK: READ
@@ -127,24 +109,19 @@ public class YapStore : Store {
     // MARK: WRITE
     
     public func add<T : Model>(object: T) {
-//        NSNotificationCenter.defaultCenter().postNotificationName("modelWillSave", object: object)
         connection.readWriteWithBlock { transaction in
             if let transaction: YapDatabaseReadWriteTransaction = transaction {
                 transaction.setObject(object, forKey:"\(object.uid)", inCollection: NSStringFromClass(T))
-//                object.saving(transaction)
             }
         }
-//        NSNotificationCenter.defaultCenter().postNotificationName("modelDidSave", object: object)
     }
     
     public func remove<T : Model>(object: T) {
-//        NSNotificationCenter.defaultCenter().postNotificationName("modelWillDelete", object: object)
         connection.readWriteWithBlock { transaction in
             if let transaction: YapDatabaseReadWriteTransaction = transaction {
                 transaction.removeObjectForKey("\(object.uid)", inCollection: NSStringFromClass(T))
             }
         }
-//        NSNotificationCenter.defaultCenter().postNotificationName("modelDidDelete", object: object)
     }
     
     public func update<T : Model>(element: T) {
@@ -192,141 +169,4 @@ public class YapStore : Store {
             }
         }
     }
-    
-//    func relationshipForName<T : Model, U: Model>(name: String, model: T) -> U? {
-//        let array : [U] = relationshipForName(name, model: model)
-//        return array.first
-//    }
-//    
-//    func relationshipForName<T : Model, U: Model>(name: String, model: T) -> [U] {
-//        var objects = [U]()
-//        
-//        connection.readWithBlock { transaction in
-//            if let transaction: YapDatabaseReadTransaction = transaction {
-//            
-//                transaction.ext("relationships").enumerateEdgesWithName(name, sourceKey: model.uid, collection: "\(NSStringFromClass(U))", usingBlock:
-//                    { (edge, stop) -> Void in
-//                    
-//                    if let object = transaction.objectForKey(edge.destinationKey, inCollection: edge.destinationCollection) as? U {
-//                        objects.append(object)
-//                    } else {
-//                        println("should trim this edge: \(edge)")
-//                    }
-//                })
-//            }
-//        }
-//        
-//        return objects
-//    }
-    
-//    func setRelationshipForName<T: Model, U: Model>(name: String, model: T, object: U, type: RelationshipType = .BelongsTo, delete: DeleteRule = .Nullify) {
-//        connection.readWriteWithBlock { transaction in
-//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
-//        
-//                transaction.ext("relationships").enumerateEdgesWithName(name, sourceKey: model.uid, collection: "\(NSStringFromClass(U))", usingBlock: { (edge, stop) -> Void in
-//                    transaction.ext("relationships").removeEdge(edge, withProcessing: YDB_NotifyReason.EdgeDeleted)
-//                })
-//                
-//                var deleteRule: UInt16 = 0
-//                switch(delete) {
-//                case .Delete:
-//                    switch(type) {
-//                    case .BelongsTo:
-//                        deleteRule =  UInt16(YDB_DeleteSourceIfDestinationDeleted)
-//                    case .HasOne:
-//                        deleteRule =  UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//                    case .HasMany:
-//                        deleteRule =  UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//                    case .HasFile:
-//                        deleteRule =  UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//                    }
-//                case .Nullify:
-//                    deleteRule = 0
-//                }
-//                
-//                let edge = YapDatabaseRelationshipEdge(name: name, sourceKey: model.uid, collection: "\(NSStringFromClass(T))", destinationKey: object.uid, collection: "\(NSStringFromClass(U))", nodeDeleteRules: deleteRule)
-//                transaction.ext("relationships").addEdge(edge)
-//            }
-//        }
-//    }
-//    
-//    func setRelationshipForName<T: Model, U: Model>(name: String, model: T, collection: [U], type: RelationshipType = .HasMany, delete: DeleteRule = .Nullify) {
-//        connection.readWriteWithBlock { transaction in
-//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
-//                
-//                transaction.ext("relationships").enumerateEdgesWithName(name, sourceKey: model.uid, collection: "\(NSStringFromClass(U))", usingBlock: { (edge, stop) -> Void in
-//                    transaction.ext("relationships").removeEdge(edge, withProcessing: YDB_NotifyReason.EdgeDeleted)
-//                })
-//                
-//                var deleteRule: UInt16 = 0
-//                switch(delete) {
-//                case .Delete:
-//                    switch(type) {
-//                    case .BelongsTo:
-//                        deleteRule =  UInt16(YDB_DeleteSourceIfDestinationDeleted)
-//                    case .HasOne:
-//                        deleteRule =  UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//                    case .HasMany:
-//                        deleteRule =  UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//                    case .HasFile:
-//                        deleteRule =  UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//                    }
-//                case .Nullify:
-//                    deleteRule = 0
-//                }
-//                
-//                for object in collection {
-//                    let edge = YapDatabaseRelationshipEdge(name: name, sourceKey: model.uid, collection: "\(NSStringFromClass(T))", destinationKey: object.uid, collection: "\(NSStringFromClass(U))", nodeDeleteRules: deleteRule)
-//                    transaction.ext("relationships").addEdge(edge)
-//                }
-//                
-//            }
-//        }
-//    }
 }
-
-//extension Relationship {
-//
-//    func yap_deleteRule() -> YDB_NodeDeleteRules {
-//        switch(delete) {
-//        case .Delete:
-//            switch(type) {
-//            case .BelongsTo:
-//                return UInt16(YDB_DeleteSourceIfDestinationDeleted)
-//            case .HasOne:
-//                return UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//            case .HasMany:
-//                return UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//            case .HasFile:
-//                return UInt16(YDB_DeleteDestinationIfSourceDeleted)
-//            }
-//        case .Nullify:
-//            return 0
-//        }
-//    }
-//
-//    func yap_relationshipEdges<T:Model, U:Model>(origin: T, target: U? = nil, targetFile: String? = nil, targetCollection: [U]? = nil) -> [YapDatabaseRelationshipEdge] {
-//        var edges = [YapDatabaseRelationshipEdge]()
-//        let name = "\(NSStringFromClass(T))\(NSStringFromClass(U))"
-//        
-//        switch(type) {
-//        case .BelongsTo:
-//            println("belongsTo")
-//            let name = "\(NSStringFromClass(T))\(NSStringFromClass(U))"
-//            let edge = YapDatabaseRelationshipEdge(name: name, sourceKey: origin.uid, collection: "\(NSStringFromClass(T))", destinationKey: target?.uid, collection: "\(NSStringFromClass(U))", nodeDeleteRules: yap_deleteRule())
-//            edges.append(edge)
-//        case .HasOne:
-//            println("hasOne")
-//        case .HasMany:
-//            println("hasMany")
-//            for target in targetCollection! {
-//                let edge = YapDatabaseRelationshipEdge(name: name, sourceKey: origin.uid, collection: "\(NSStringFromClass(T))", destinationKey: target.uid, collection: "\(NSStringFromClass(U))", nodeDeleteRules: yap_deleteRule())
-//                edges.append(edge)
-//            }
-//        case .HasFile:
-//            println("hasFile")
-//        }
-//        return edges
-//    }
-//    
-//}

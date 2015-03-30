@@ -8,14 +8,8 @@
 
 import Foundation
 
+/// Data.Model
 public protocol Model : NSCoding, Equatable {
+    /// Unique identifier
     var uid : String { get }
 }
-
-//protocol ModelRelationships {
-//
-//}
-
-//func ==<T: Model>(lhs: T, rhs: T) -> Bool {
-//    return lhs.uid == rhs.uid
-//}

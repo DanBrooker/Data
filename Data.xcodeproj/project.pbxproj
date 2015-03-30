@@ -11,7 +11,6 @@
 		2D99DBEF290E07565A0C9A65 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62E8DFEFBB05C4DEF32CBAFC /* Pods_Example.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		657BDEB01AB6734100068AF5 /* Data.h in Headers */ = {isa = PBXBuildFile; fileRef = 657BDEAF1AB6734100068AF5 /* Data.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		657BDEB61AB6734100068AF5 /* Data.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 657BDEAA1AB6734100068AF5 /* Data.framework */; };
-		657BDEBD1AB6734100068AF5 /* DataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEBC1AB6734100068AF5 /* DataTests.swift */; };
 		657BDEC81AB6735E00068AF5 /* YapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEC61AB6735E00068AF5 /* YapStore.swift */; };
 		657BDECA1AB6735E00068AF5 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEC71AB6735E00068AF5 /* Store.swift */; };
 		657BDECD1AB6EC3500068AF5 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDECC1AB6EC3500068AF5 /* Model.swift */; };
@@ -65,7 +64,6 @@
 		657BDEAF1AB6734100068AF5 /* Data.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Data.h; sourceTree = "<group>"; };
 		657BDEB51AB6734100068AF5 /* DataTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DataTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		657BDEBB1AB6734100068AF5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		657BDEBC1AB6734100068AF5 /* DataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataTests.swift; sourceTree = "<group>"; };
 		657BDEC61AB6735E00068AF5 /* YapStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YapStore.swift; sourceTree = "<group>"; };
 		657BDEC71AB6735E00068AF5 /* Store.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		657BDECC1AB6EC3500068AF5 /* Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
@@ -185,7 +183,6 @@
 		657BDEB91AB6734100068AF5 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				657BDEBC1AB6734100068AF5 /* DataTests.swift */,
 				657BDECF1AB6EF8B00068AF5 /* YapStoreTests.swift */,
 				657BDEBA1AB6734100068AF5 /* Supporting Files */,
 			);
@@ -539,7 +536,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				657BDED01AB6EF8B00068AF5 /* YapStoreTests.swift in Sources */,
-				657BDEBD1AB6734100068AF5 /* DataTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

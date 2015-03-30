@@ -1,4 +1,4 @@
-# Data.swift
+# Data
 
 Data is a Swift framework for working with data models.
 > It uses YapDatabase and not CoreData
@@ -15,15 +15,13 @@ It aims to have the following attributes:
 
 Podfile
 ```
-pod 'Data.swift'
+pod 'Data', git: 'https://github.com/DanBrooker/Data'
 ```
 
 ## Carthage
 
-Cartfile
-```
-github "DanBrooker/Data.swift"
-```
+Not yet, just waiting on YapDatabase to have a frameowrk target
+https://github.com/yapstudios/YapDatabase/issues/152
 
 ## Setup
 
@@ -138,16 +136,14 @@ let query = Query<YourModel>(
 ## Notifications
 Options:
 
-a) You can set a `StoreDelegate` to be notified about global changes to the datastore.
-
-b) You can observe the following notifications for changes
+a) You can observe the following notifications for changes
 * "dataStoreAdded"
-> Not actually called yet, doesn't distinguish between modified and added currently
+> Not actually called yet, cannot distinguish between modified and added currently
 
 * "dataStoreModified"
 * "dataStoreRemoved"
 
-c) And this is the best option use `Data<T>` collections
+b) And this is the best option use `Data<T>` collections
 
 ## Collections
 
