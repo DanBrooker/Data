@@ -13,10 +13,7 @@ It aims to have the following attributes:
 
 ## Cocoapods
 
-Podfile
-```
-pod 'Data', git: 'https://github.com/DanBrooker/Data'
-```
+WIP
 
 ## Carthage
 
