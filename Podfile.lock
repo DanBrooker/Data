@@ -15,7 +15,7 @@ DEPENDENCIES:
   - YapDatabase
 
 SPEC CHECKSUMS:
-  CocoaLumberjack: 205769c032b5fef85b92472046bcc8b7e7c8a817
-  YapDatabase: c1d6912df1b4a160f7373ee7657d360e29bb00fd
+  CocoaLumberjack: 628fca2e88ef06f7cf6817309aa405f325d9a6fa
+  YapDatabase: 52370b36f692e23c41c86e60f3bbf81b1c8ae44a
 
-COCOAPODS: 0.36.0
+COCOAPODS: 0.36.1
