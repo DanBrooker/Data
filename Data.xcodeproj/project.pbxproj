@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		24ED43885EF5C3F867627275 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BB1513FE50525E561F030AC /* Pods.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		2D99DBEF290E07565A0C9A65 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62E8DFEFBB05C4DEF32CBAFC /* Pods_Example.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		657BDEB01AB6734100068AF5 /* Data.h in Headers */ = {isa = PBXBuildFile; fileRef = 657BDEAF1AB6734100068AF5 /* Data.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		657BDEB61AB6734100068AF5 /* Data.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 657BDEAA1AB6734100068AF5 /* Data.framework */; };
@@ -110,7 +109,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				24ED43885EF5C3F867627275 /* Pods.framework in Frameworks */,
 				F77BE76521DA56DFFF430A5F /* Pods_Data.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
