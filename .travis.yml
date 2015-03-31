@@ -1,11 +1,10 @@
-osx_image: xcode61
 language: objective-c
 
 before_install:
   - gem install cocoapods -v '0.36.1'
-
-before_script:
-  - make setup
+  - brew update
+  - if brew outdated | grep -qx xctool; then brew upgrade xctool; fi
 
 script:
-  - make test
+  - xctool clean build -workspace Data.xcworkspace -scheme Data
+  - xctool test -workspace Data.xcworkspace -scheme Data -sdk iphonesimulator

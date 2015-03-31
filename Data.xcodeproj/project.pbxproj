@@ -24,6 +24,7 @@
 		657BDF021AB8F0BF00068AF5 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDF011AB8F0BF00068AF5 /* Query.swift */; };
 		657BDF0C1ABAE7B400068AF5 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDF0B1ABAE7B400068AF5 /* Message.swift */; };
 		659DBB681AC4DABD003CB923 /* ObserverProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659DBB671AC4DABD003CB923 /* ObserverProxy.swift */; };
+		65CB15021ACA2E0700F5074F /* Data.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 657BDEAA1AB6734100068AF5 /* Data.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		76DC825B816A880F3FF0299E /* Pods_DataTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08942A425A0201BEF2A4E76F /* Pods_DataTests.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		F77BE76521DA56DFFF430A5F /* Pods_Data.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33E719E473F8F99CB72A87F5 /* Pods_Data.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
@@ -51,6 +52,20 @@
 			remoteInfo = Data;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		65CB15011ACA2DF100F5074F /* Copy Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				65CB15021ACA2E0700F5074F /* Data.framework in Copy Frameworks */,
+			);
+			name = "Copy Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		08942A425A0201BEF2A4E76F /* Pods_DataTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DataTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -274,6 +289,7 @@
 			buildConfigurationList = 657BDEC31AB6734100068AF5 /* Build configuration list for PBXNativeTarget "DataTests" */;
 			buildPhases = (
 				FEF61B2B191B11DE455F839A /* Check Pods Manifest.lock */,
+				65CB15011ACA2DF100F5074F /* Copy Frameworks */,
 				657BDEB11AB6734100068AF5 /* Sources */,
 				657BDEB21AB6734100068AF5 /* Frameworks */,
 				657BDEB31AB6734100068AF5 /* Resources */,
