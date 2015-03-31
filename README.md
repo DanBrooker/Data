@@ -19,7 +19,7 @@ WIP
 
 ## Carthage
 
-Not yet, just waiting on YapDatabase to have a frameowrk target
+Not yet, just waiting on YapDatabase to have a framework target
 https://github.com/yapstudios/YapDatabase/issues/152
 
 ## Setup

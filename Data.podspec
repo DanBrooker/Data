@@ -7,8 +7,8 @@ Pod::Spec.new do |s|
   s.license      = { type: 'MIT', file: 'LICENCE' }
   s.author             = { 'Danirl Brooker' => 'dan@nocturnalcode.com' }
   s.ios.deployment_target = '8.0'
-  s.osx.deployment_target = '10.10'
-  s.source       = { git: 'https://github.com/vikmeup/SCLAlertView-Swift.git' }
+  # s.osx.deployment_target = '10.10'
+  s.source       = { git: 'https://github.com/vikmeup/SCLAlertView-Swift.git', branch: 'master' }
   s.source_files = "Data/*.swift"
   s.requires_arc = true
   s.dependency 'YapDatabase'
