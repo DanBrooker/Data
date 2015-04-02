@@ -15,7 +15,12 @@ It aims to have the following attributes:
 
 ## Cocoapods
 
-WIP
+```ruby
+platform :ios, '8.0'
+use_frameworks!
+
+pod 'Data', git: 'https://github.com/DanBrooker/Data'
+```
 
 ## Carthage
 
