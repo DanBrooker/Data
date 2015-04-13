@@ -53,3 +53,36 @@ public struct Query<T : Model> {
         return array
     }
 }
+
+
+//public class Relationship {
+//    
+//    public enum Arity {
+//        case BelongsTo
+//        case HasMany
+//        case HasFile
+//    }
+//    
+//    public enum Delete {
+//        case Nullify
+//        case Cascade
+//    }
+//    
+//    public init<T: Model>(object: T, arity: Arity, name: String, delete: Delete = .Nullify) {
+//        
+//    }
+//    
+//    public class func query<T: Model>(object: T, arity: Arity, name: String, delete: Delete = .Nullify) -> Query<T> {
+//        return Query()
+//    }
+//}
+
+public class HasMany<T,U> {
+    
+//    let name: String
+    
+    public init<T: Model, U: Model>() {
+//        self.name = name
+    }
+    
+}

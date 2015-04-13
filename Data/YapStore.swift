@@ -23,12 +23,12 @@ public class YapStore : Store {
     }
     
     public var path: String {
-        let dir = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+        let dir = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
         return dir.stringByAppendingPathComponent("\(name).yap")
     }
 
     public init(name: String = "database") {
-        let dir = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+        let dir = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
         let path = dir.stringByAppendingPathComponent("\(name).yap")
         
         self.name = name
@@ -80,7 +80,7 @@ public class YapStore : Store {
         connection.readWithBlock { transaction in
             if let transaction: YapDatabaseReadTransaction = transaction {
                 transaction.enumerateKeysInCollection(NSStringFromClass(T)) { key, _ in
-                    let object = transaction.objectForKey(key, inCollection: NSStringFromClass(T)) as T
+                    let object = transaction.objectForKey(key, inCollection: NSStringFromClass(T)) as! T
                     objects.append(object as T)
                 }
             }
@@ -142,7 +142,7 @@ public class YapStore : Store {
         connection.readWithBlock { transaction in
             if let transaction: YapDatabaseReadTransaction = transaction {
                 transaction.enumerateKeysInCollection(NSStringFromClass(T)) { key, _ in
-                    let object = transaction.objectForKey(key, inCollection: NSStringFromClass(T)) as T
+                    let object = transaction.objectForKey(key, inCollection: NSStringFromClass(T)) as! T
                     objects.append(object as T)
                 }
             }
@@ -155,7 +155,7 @@ public class YapStore : Store {
         connection.readWithBlock { transaction in
             if let transaction: YapDatabaseReadTransaction = transaction {
                 if transaction.hasObjectForKey(key, inCollection: collection) {
-                    obj = .Some(transaction.objectForKey(key, inCollection: collection) as T)
+                    obj = .Some(transaction.objectForKey(key, inCollection: collection) as! T)
                 }
             }
         }

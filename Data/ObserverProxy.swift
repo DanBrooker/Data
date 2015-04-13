@@ -20,7 +20,7 @@
     }
     
     convenience init(name: String, object: AnyObject, closure: (NSNotification) -> ()) {
-        self.init(name: name, closure);
+        self.init(name: name, closure: closure);
         self.object = object;
     }
     

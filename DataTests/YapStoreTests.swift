@@ -20,7 +20,7 @@ class TestModel : NSObject, Model {
     }
     
     required init(coder aDecoder: NSCoder) {
-        uid = aDecoder.decodeObjectForKey("uid") as String
+        uid = aDecoder.decodeObjectForKey("uid") as! String
     }
     
     func encodeWithCoder(aCoder: NSCoder) {
@@ -29,6 +29,52 @@ class TestModel : NSObject, Model {
 }
 
 func ==(lhs: TestModel, rhs: TestModel) -> Bool {
+    return lhs.uid == rhs.uid
+}
+
+class TestA : NSObject, Model {
+    let uid: String
+    
+//    lazy var bees: HasMany<TestA, TestB> = {
+//        return HasMany<TestA, TestB>()
+//    }()
+    
+    init(uid: String) {
+        self.uid = uid
+//        self.bees = HasMany(name: "bees", owner: uid)
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        uid = aDecoder.decodeObjectForKey("uid") as! String
+//        self.bees = HasMany(name: "bees", owner: self) //Data<TestB>(query: Relationship.query(self, .HasMany, "bees"), store: store)
+    }
+    
+    func encodeWithCoder(aCoder: NSCoder) {
+        aCoder.encodeObject(uid, forKey: "uid")
+    }
+}
+
+func ==(lhs: TestA, rhs: TestA) -> Bool {
+    return lhs.uid == rhs.uid
+}
+
+class TestB : NSObject, Model {
+    let uid: String
+    
+    init(uid: String) {
+        self.uid = uid
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        uid = aDecoder.decodeObjectForKey("uid") as! String
+    }
+    
+    func encodeWithCoder(aCoder: NSCoder) {
+        aCoder.encodeObject(uid, forKey: "uid")
+    }
+}
+
+func ==(lhs: TestB, rhs: TestB) -> Bool {
     return lhs.uid == rhs.uid
 }
 
@@ -311,6 +357,26 @@ class YapStoreTests: XCTestCase {
         
 //        data.query.order = { $1.created > $0.created }
     }
+    
+    func testBelongsToRelation() {
+        
+    }
+    
+    func testHasOneToRelation() {
+        
+    }
+    
+    func testHasManyToRelation() {
+        
+    }
+    
+    func testImplicitRelation() {
+        
+    }
+    
+    func testExplicitRelation() {
+        
+    }
 
     
     // MARK: Private
@@ -320,7 +386,7 @@ class YapStoreTests: XCTestCase {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(timeout)), dispatch_get_main_queue(), { () -> () in
             expectation.fulfill()
         })
-        waitForExpectationsWithTimeout(timeout, nil)
+        waitForExpectationsWithTimeout(timeout, handler: nil)
     }
     
     class TableViewDelegate : DataDelegate {

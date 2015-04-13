@@ -27,8 +27,8 @@ class Message : NSObject, Model {
     }
     
     required init(coder aDecoder: NSCoder) {
-        self.uid = aDecoder.decodeObjectForKey("uid") as String
-        self.text = aDecoder.decodeObjectForKey("text") as String
+        self.uid = aDecoder.decodeObjectForKey("uid") as! String
+        self.text = aDecoder.decodeObjectForKey("text") as! String
     }
     
     func encodeWithCoder(aCoder: NSCoder) {
