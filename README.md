@@ -25,7 +25,7 @@ pod 'Data', git: 'https://github.com/DanBrooker/Data'
 ## Carthage
 
 Not yet, just waiting on YapDatabase to have a framework target
-https://github.com/yapstudios/YapDatabase/issues/152
+https://github.com/yapstudios/YapDatabase/issues/131
 
 ## Setup
 
