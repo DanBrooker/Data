@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2D99DBEF290E07565A0C9A65 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62E8DFEFBB05C4DEF32CBAFC /* Pods_Example.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		6533CF201B082E42002C7FD3 /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6533CF1F1B082E42002C7FD3 /* Index.swift */; };
 		657BDEB01AB6734100068AF5 /* Data.h in Headers */ = {isa = PBXBuildFile; fileRef = 657BDEAF1AB6734100068AF5 /* Data.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		657BDEB61AB6734100068AF5 /* Data.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 657BDEAA1AB6734100068AF5 /* Data.framework */; };
 		657BDEC81AB6735E00068AF5 /* YapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEC61AB6735E00068AF5 /* YapStore.swift */; };
@@ -73,6 +74,7 @@
 		3BB1513FE50525E561F030AC /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52D049B6E364055AF19948C2 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
 		62E8DFEFBB05C4DEF32CBAFC /* Pods_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6533CF1F1B082E42002C7FD3 /* Index.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Index.swift; sourceTree = "<group>"; };
 		657BDEAA1AB6734100068AF5 /* Data.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Data.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		657BDEAE1AB6734100068AF5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		657BDEAF1AB6734100068AF5 /* Data.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Data.h; sourceTree = "<group>"; };
@@ -177,6 +179,7 @@
 				657BDECC1AB6EC3500068AF5 /* Model.swift */,
 				657BDEC71AB6735E00068AF5 /* Store.swift */,
 				657BDEC61AB6735E00068AF5 /* YapStore.swift */,
+				6533CF1F1B082E42002C7FD3 /* Index.swift */,
 				657BDEFF1AB8F0A100068AF5 /* Data.swift */,
 				657BDF011AB8F0BF00068AF5 /* Query.swift */,
 				659DBB671AC4DABD003CB923 /* ObserverProxy.swift */,
@@ -537,6 +540,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				657BDF021AB8F0BF00068AF5 /* Query.swift in Sources */,
+				6533CF201B082E42002C7FD3 /* Index.swift in Sources */,
 				657BDECD1AB6EC3500068AF5 /* Model.swift in Sources */,
 				657BDEC81AB6735E00068AF5 /* YapStore.swift in Sources */,
 				657BDECA1AB6735E00068AF5 /* Store.swift in Sources */,

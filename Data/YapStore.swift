@@ -78,12 +78,12 @@ public class YapStore : Store {
     public func all<T : Model>() -> [T] {
         var objects = [T]()
         connection.readWithBlock { transaction in
-            if let transaction: YapDatabaseReadTransaction = transaction {
+//            if let transaction: YapDatabaseReadTransaction = transaction {
                 transaction.enumerateKeysInCollection(NSStringFromClass(T)) { key, _ in
                     let object = transaction.objectForKey(key, inCollection: NSStringFromClass(T)) as! T
                     objects.append(object as T)
                 }
-            }
+//            }
         }
         return objects
     }
@@ -110,17 +110,17 @@ public class YapStore : Store {
     
     public func add<T : Model>(object: T) {
         connection.readWriteWithBlock { transaction in
-            if let transaction: YapDatabaseReadWriteTransaction = transaction {
+//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
                 transaction.setObject(object, forKey:"\(object.uid)", inCollection: NSStringFromClass(T))
-            }
+//            }
         }
     }
     
     public func remove<T : Model>(object: T) {
         connection.readWriteWithBlock { transaction in
-            if let transaction: YapDatabaseReadWriteTransaction = transaction {
+//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
                 transaction.removeObjectForKey("\(object.uid)", inCollection: NSStringFromClass(T))
-            }
+//            }
         }
     }
     
@@ -130,9 +130,9 @@ public class YapStore : Store {
     
     public func truncate<T: Model>(klass: T.Type) {
         connection.readWriteWithBlock { transaction in
-            if let transaction: YapDatabaseReadWriteTransaction = transaction {
+//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
                 transaction.removeAllObjectsInCollection(NSStringFromClass(T))
-            }
+//            }
         }
     }
     
@@ -140,33 +140,144 @@ public class YapStore : Store {
         
         var objects = [T]()
         connection.readWithBlock { transaction in
-            if let transaction: YapDatabaseReadTransaction = transaction {
+//            if let transaction: YapDatabaseReadTransaction = transaction {
                 transaction.enumerateKeysInCollection(NSStringFromClass(T)) { key, _ in
                     let object = transaction.objectForKey(key, inCollection: NSStringFromClass(T)) as! T
                     objects.append(object as T)
                 }
-            }
+//            }
         }
         return query.apply(objects)
     }
     
-    func objectForKey<T>(key: String, collection: String = "") -> T? {
+    public func objectForKey<T>(key: String, collection: String = "") -> T? {
         var obj : T? = nil
         connection.readWithBlock { transaction in
-            if let transaction: YapDatabaseReadTransaction = transaction {
+//            if let transaction: YapDatabaseReadTransaction = transaction {
                 if transaction.hasObjectForKey(key, inCollection: collection) {
                     obj = .Some(transaction.objectForKey(key, inCollection: collection) as! T)
                 }
-            }
+//            }
         }
         return obj
     }
     
-    func setObject(object: AnyObject, forKey key: String, collection: String = "") {
+    public func setObject(object: AnyObject, forKey key: String, collection: String = "") {
         connection.readWriteWithBlock { transaction in
-            if let transaction: YapDatabaseReadWriteTransaction = transaction {
+//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
                 transaction.setObject(object, forKey:key, inCollection: collection)
+//            }
+        }
+    }
+    
+    // MARK: Indexing
+    
+    /// Adding an index
+    public func index<T: Model>(model : T, block: ((object: T) -> [Index])  ) {
+        
+        let setup = YapDatabaseSecondaryIndexSetup()
+        
+        let indexes = block(object: model)
+        if indexes.isEmpty {
+            return
+        }
+        
+        for index in indexes {
+            switch(index.value) {
+            case let double as Double:
+                setup.addColumn(index.key, withType: .Real)
+            case let float as Float:
+                setup.addColumn(index.key, withType: .Real)
+            case let int as Int:
+                setup.addColumn(index.key, withType: .Integer)
+            case let int as Bool:
+                setup.addColumn(index.key, withType: .Integer)
+            case let text as String:
+                setup.addColumn(index.key, withType: .Text)
+            default:
+                println("Couldn't add index for \(index)")
+                return
             }
         }
+        
+        let handler = YapDatabaseSecondaryIndexHandler.withRowBlock({ dictionary, _collection, _key, object, _metadata in
+            if let model = object as? T {
+                for index in block(object: model) {
+                    if let value: AnyObject = index.value as? AnyObject {
+                        dictionary[index.key] = value
+                    }
+                }
+            }
+        })
+        let secondaryIndex = YapDatabaseSecondaryIndex(setup: setup, handler: handler)
+        
+        database.registerExtension(secondaryIndex, withName: "\(NSStringFromClass(T))_index")
+    }
+    
+    public func find<T: Model>(key: String, value: String) -> T? {
+        return findModels([key: value]).first
+    }
+    
+    public func find<T: Model>(key: String, value: Bool) -> T? {
+        return findModels([key: value]).first
+    }
+    
+    public func find<T: Model>(key: String, value: Double) -> T? {
+        return findModels([key: value]).first
+    }
+    
+    public func find<T: Model>(key: String, value: Float) -> T? {
+        return findModels([key: value]).first
+    }
+    
+    public func filter<T: Model>(key: String, value: String) -> [T] {
+        return findModels([key: value])
+    }
+    
+    public func filter<T: Model>(key: String, value: Bool) -> [T] {
+        return findModels([key: value])
+    }
+    
+    public func filter<T: Model>(key: String, value: Double) -> [T] {
+        return findModels([key: value])
+    }
+    
+    public func filter<T: Model>(key: String, value: Float) -> [T] {
+        return findModels([key: value])
+    }
+
+    func findModels<T: Model>(queryHash: [String: AnyObject]) -> [T] {
+        var query : YapDatabaseQuery? = nil
+        if let key = queryHash.keys.first { //
+            
+            if let value: AnyObject = queryHash[key] {
+                query = YapDatabaseQuery.queryWithFormat("WHERE \(key) = ?", (value as! NSObject))
+            }
+        }
+        
+        if query == nil {
+            println("couldn't build query for \(queryHash)")
+            return []
+        }
+        
+        var models = [T]()
+        connection.readWithBlock { transaction in
+            let index = transaction.ext("\(NSStringFromClass(T))_index") as! YapDatabaseSecondaryIndexTransaction
+            
+            index.enumerateKeysAndObjectsMatchingQuery(query, usingBlock: { _, _, object, _ in
+                if let object = object as? T {
+                    models.append(object)
+                }
+            })
+        }
+        
+        return models
+    }
+    
+}
+
+extension YapDatabaseQuery {
+    class func queryWithFormat(format: String, _ arguments: CVarArgType...) -> YapDatabaseQuery? {
+        return withVaList(arguments, { YapDatabaseQuery(format: format, arguments: $0) })
     }
 }

@@ -1,15 +1,16 @@
 # Data
 
 [![Build Status](https://travis-ci.org/DanBrooker/Data.svg?branch=master)](https://travis-ci.org/DanBrooker/Data)
+> Travis doesn't yet support Swift 1.2, the tests do pass however. See issue #1
 
-Data is a Swift framework for working with data models.
+Data is a Swift (1.2) framework for working with data models.
 > It uses YapDatabase and not CoreData
 
 It aims to have the following attributes:
 * Threadsafe
 * Typesafe
 * Tested
-* Uses protocols not subclasses
+* Protocols not Inheritance
 
 # Getting started
 
@@ -194,7 +195,7 @@ extension ViewController: DataDelegate {
 
 YapDatabase is actually a key-value store, or more correctly a hash of hashes.
 
-You can also just store arbitrary key-values
+You can therefore just store arbitrary key-values if you need to
 ```swift
 // Set
 store.setObjectForKey(object, forKey:"key")
@@ -202,11 +203,40 @@ store.setObjectForKey(object, forKey:"key")
 let object : ObjectType = store.objectForKey("key")
 ```
 
+## Indexes - WIP
+
+> Basic indexes are working but the API is not solidified yet
+> Aggregate index `filter`ing not yet supported
+
+Setup Indexes, once per model
+```swift
+let example = TestModel(uid: "doesn't matter")
+store.index(example) { model in
+    return [
+        Index(key: "uid", value: model.uid),
+        Index(key: "enabled", value: model.enabled)
+    ]
+}
+```
+> Indexable types String, Int Double, Float, Bool
+
+## Find
+
+```swift
+var unique: TestModel? = store.find("enabled", value: true)
+```
+
+## Filter
+
+```swift
+var enabled: [TestModel] = store.filter("enabled", value: true)
+```
+
 # TODO
 
-* Relationships (Delete rules)
-* Secondary indexes for performance
+* Secondary index aggregation i.e. OR and AND
 * Full text search
+* Relationships (Delete rules)
 * Metadata helpers for things like caching table row height
 * Tableview sections with Data<>
 * Data syncing - CloudKit, Dropbox ...

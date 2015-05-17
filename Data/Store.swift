@@ -50,4 +50,7 @@ public protocol Store {
     func update<T : Model>(element: T)
     
     func truncate<T: Model>(klass: T.Type)
+    
+    // INDEXES
+//    func index<T:Model>:(klass: T.Type, )
 }

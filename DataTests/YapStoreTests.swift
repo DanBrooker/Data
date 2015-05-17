@@ -14,17 +14,21 @@ let store = YapStore()
 class TestModel : NSObject, Model {
     
     let uid: String
+    let enabled: Bool
     
-    init(uid: String) {
+    init(uid: String, enabled: Bool = true) {
         self.uid = uid
+        self.enabled = enabled
     }
     
     required init(coder aDecoder: NSCoder) {
         uid = aDecoder.decodeObjectForKey("uid") as! String
+        enabled =  aDecoder.decodeBoolForKey("enabled")
     }
     
     func encodeWithCoder(aCoder: NSCoder) {
         aCoder.encodeObject(uid, forKey: "uid")
+        aCoder.encodeBool(enabled, forKey: "enabled")
     }
 }
 
@@ -91,6 +95,8 @@ class YapStoreTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
+    
+    // MARK: - READ
     
     //    func all<T : Model>() -> [T]
     func testAll() {
@@ -193,6 +199,8 @@ class YapStoreTests: XCTestCase {
 //        
 //        XCTAssert(all.count == 2, "Should have 2 groups but was \(all.count))")
 //    }
+    
+    // MARK: - WRITE
    
     //    func add<T : Model>(element: T)
     func testAdd() {
@@ -272,6 +280,8 @@ class YapStoreTests: XCTestCase {
         XCTAssert(store.count(TestModel.self) == 0, "Should have 0 models but was \(store.count(TestModel.self))")
         XCTAssert(data.count == 0, "Should have 0 models but was \(data.count)")
     }
+    
+    // MARK: - Tableview
     
     func testTableViewDelegate() {
         
@@ -358,28 +368,67 @@ class YapStoreTests: XCTestCase {
 //        data.query.order = { $1.created > $0.created }
     }
     
-    func testBelongsToRelation() {
+    // MARK: - Relationships - TODO
+
+//    func testBelongsToRelation() {
+//        
+//    }
+//    
+//    func testHasOneToRelation() {
+//        
+//    }
+//    
+//    func testHasManyToRelation() {
+//        
+//    }
+//    
+//    func testImplicitRelation() {
+//        
+//    }
+//    
+//    func testExplicitRelation() {
+//        
+//    }
+    
+    // MARK: - Indexes
+    
+    func testSecondaryIndexFind() {
+
+        let example = TestModel(uid: "doesn't matter")
+        store.index(example) { model in // this block is called initially to help build index and then later on saving to index the real values
+            return [
+                Index(key: "uid", value: model.uid),
+                Index(key: "enabled", value: model.enabled)
+            ]
+        }
         
+        store.add(TestModel(uid: "unique", enabled: true))
+        
+        var unique: TestModel? = store.find("enabled", value: true) // Use an index if it exists, which in this case it does
+        XCTAssertNotNil(unique, "Should have found the object using the secondary index")
     }
     
-    func testHasOneToRelation() {
+    func testSecondaryIndexWhere() {
         
-    }
-    
-    func testHasManyToRelation() {
+        let example = TestModel(uid: "doesn't matter")
+        store.index(example) { model in
+            return [
+                Index(key: "uid", value: model.uid),
+                Index(key: "enabled", value: model.enabled)
+            ]
+        }
         
-    }
-    
-    func testImplicitRelation() {
+        store.add(TestModel(uid: "unique1", enabled: true))
+        store.add(TestModel(uid: "unique2", enabled: true))
+        store.add(TestModel(uid: "unique3", enabled: false))
+        store.add(TestModel(uid: "unique4", enabled: false))
         
-    }
-    
-    func testExplicitRelation() {
-        
+        var enabled: [TestModel] = store.filter("enabled", value: true)
+        XCTAssertEqual(enabled.count, 2)
     }
 
     
-    // MARK: Private
+    // MARK: - Private
     
     func waitFor(name: String, timeout: NSTimeInterval = 1) {
         let expectation = expectationWithDescription(name)

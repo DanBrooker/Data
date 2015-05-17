@@ -6,8 +6,6 @@
 //  Copyright (c) 2015 Nocturnal Code. All rights reserved.
 //
 
-import Foundation
-
 /// Data.Model
 public protocol Model : NSCoding, Equatable {
     /// Unique identifier
