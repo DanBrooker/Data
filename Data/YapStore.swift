@@ -214,37 +214,43 @@ public class YapStore : Store {
         database.registerExtension(secondaryIndex, withName: "\(NSStringFromClass(T))_index")
     }
     
-    public func find<T: Model>(key: String, value: String) -> T? {
-        return findModels([key: value]).first
+    public func find<T: Model>(key: String, value: Indexable) -> T? {
+        if let value: AnyObject = value as? AnyObject {
+            return findModels([key: value]).first
+        }
+        return nil
     }
     
-    public func find<T: Model>(key: String, value: Bool) -> T? {
-        return findModels([key: value]).first
+//    public func find<T: Model>(key: String, value: Bool) -> T? {
+//        return findModels([key: value]).first
+//    }
+//    
+//    public func find<T: Model>(key: String, value: Double) -> T? {
+//        return findModels([key: value]).first
+//    }
+//    
+//    public func find<T: Model>(key: String, value: Float) -> T? {
+//        return findModels([key: value]).first
+//    }
+    
+    public func filter<T: Model>(key: String, value: Indexable) -> [T] {
+        if let value: AnyObject = value as? AnyObject {
+            return findModels([key: value])
+        }
+        return []
     }
     
-    public func find<T: Model>(key: String, value: Double) -> T? {
-        return findModels([key: value]).first
-    }
-    
-    public func find<T: Model>(key: String, value: Float) -> T? {
-        return findModels([key: value]).first
-    }
-    
-    public func filter<T: Model>(key: String, value: String) -> [T] {
-        return findModels([key: value])
-    }
-    
-    public func filter<T: Model>(key: String, value: Bool) -> [T] {
-        return findModels([key: value])
-    }
-    
-    public func filter<T: Model>(key: String, value: Double) -> [T] {
-        return findModels([key: value])
-    }
-    
-    public func filter<T: Model>(key: String, value: Float) -> [T] {
-        return findModels([key: value])
-    }
+//    public func filter<T: Model>(key: String, value: Bool) -> [T] {
+//        return findModels([key: value])
+//    }
+//    
+//    public func filter<T: Model>(key: String, value: Double) -> [T] {
+//        return findModels([key: value])
+//    }
+//    
+//    public func filter<T: Model>(key: String, value: Float) -> [T] {
+//        return findModels([key: value])
+//    }
 
     func findModels<T: Model>(queryHash: [String: AnyObject]) -> [T] {
         var query : YapDatabaseQuery? = nil
