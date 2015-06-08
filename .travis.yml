@@ -9,3 +9,4 @@ before_install:
 script:
   - xctool clean build -workspace Data.xcworkspace -scheme Data
   - xctool test -workspace Data.xcworkspace -scheme Data -sdk iphonesimulator
+  
