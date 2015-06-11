@@ -36,29 +36,31 @@ func ==(lhs: TestModel, rhs: TestModel) -> Bool {
     return lhs.uid == rhs.uid
 }
 
-class TestA : NSObject, Model {
+class Tweet : NSObject, Model {
     let uid: String
+    let text: String
+    let authorName: String
     
-//    lazy var bees: HasMany<TestA, TestB> = {
-//        return HasMany<TestA, TestB>()
-//    }()
-    
-    init(uid: String) {
+    init(uid: String, text: String, authorName: String) {
         self.uid = uid
-//        self.bees = HasMany(name: "bees", owner: uid)
+        self.text = text
+        self.authorName = authorName
     }
     
     required init(coder aDecoder: NSCoder) {
         uid = aDecoder.decodeObjectForKey("uid") as! String
-//        self.bees = HasMany(name: "bees", owner: self) //Data<TestB>(query: Relationship.query(self, .HasMany, "bees"), store: store)
+        text = aDecoder.decodeObjectForKey("text") as! String
+        authorName = aDecoder.decodeObjectForKey("authorName") as! String
     }
     
     func encodeWithCoder(aCoder: NSCoder) {
         aCoder.encodeObject(uid, forKey: "uid")
+        aCoder.encodeObject(text, forKey: "text")
+        aCoder.encodeObject(authorName, forKey: "authorName")
     }
 }
 
-func ==(lhs: TestA, rhs: TestA) -> Bool {
+func ==(lhs: Tweet, rhs: Tweet) -> Bool {
     return lhs.uid == rhs.uid
 }
 
@@ -91,6 +93,7 @@ class YapStoreTests: XCTestCase {
     
     override func tearDown() {
         store.truncate(TestModel.self)
+        store.truncate(Tweet.self)
         waitFor("Truncating Notifications")
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
@@ -425,6 +428,119 @@ class YapStoreTests: XCTestCase {
         
         var enabled: [TestModel] = store.filter("enabled", value: true)
         XCTAssertEqual(enabled.count, 2)
+    }
+    
+    // MARK - Search
+    
+    func tweetIndex() {
+        let example = Tweet(uid: "doesn't matter", text: "also doesn't matter", authorName: "anon")
+        store.index(example) { tweet in
+            return [
+                Index(key: "text", value: tweet.text),
+                Index(key: "authorName", value: tweet.authorName)
+            ]
+        }
+        
+    }
+    
+    func testSearchContainsWord() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "this is a tweet about yap database", authorName: "draconisNZ"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet about yapdatabase", authorName: "draconisNZ"))
+        
+        let results : [Tweet] = store.search(string: "yapdatabase")
+        XCTAssertEqual(results.count, 1)
+    }
+    
+    func testSearchContainsPhrase() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "this is a tweet about yapdatabase", authorName: "draconisNZ"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet storm about yapdatabase", authorName: "draconisNZ"))
+        
+        var results: [Tweet] = store.search(phrase: "tweet about")
+        XCTAssertEqual(results.count, 1)
+        
+        results = store.search(string: "\"tweet about\"") // Alternate
+        XCTAssertEqual(results.count, 1)
+    }
+    
+    func testSearchKeyContainsWord() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "@draconisNZ yapdatabase", authorName: "twitter"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet about yapdatabase", authorName: "draconisNZ"))
+        
+        let results: [Tweet] = store.search(string: "authorName:draconisNZ")
+        XCTAssertEqual(results.count, 1)
+    }
+    
+    func testSearchBeginsWith() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "draconisNZ yapdatabase", authorName: "twitter"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet about yapdatabase", authorName: "draconisNZ"))
+        store.add(Tweet(uid: "12347", text: "something draconisNZ something something", authorName: "darkside"))
+        
+        let results: [Tweet] = store.search(string: "^draconisNZ")
+        XCTAssertEqual(results.count, 2) // Matches text (12345) and authorName (12346)
+        
+    }
+    func testSearchWildcard() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "@draconisNZ yapdatabse", authorName: "twitter"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet about yapdatabase", authorName: "draconisNZ"))
+        
+        let results: [Tweet] = store.search(string: "yap*")
+        XCTAssertEqual(results.count, 2)
+    }
+    
+    func testSearchAnd() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "@draconisNZ yapdatabse tweet", authorName: "twitter"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet about yapdatabase", authorName: "draconisNZ"))
+        
+        let results: [Tweet] = store.search(string: "'tweet AND yapdatabase'")
+        XCTAssertEqual(results.count, 1)
+    }
+    
+    func testSearchOr() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "@draconisNZ yapdatabse", authorName: "twitter"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet about yapdatabase", authorName: "draconisNZ"))
+        
+        let results: [Tweet] = store.search(string: "'yapdatabase OR yapdatabse'")
+        XCTAssertEqual(results.count, 2)
+    }
+    
+    func testSearchNot() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "@draconisNZ yapdatabse", authorName: "twitter"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet about yapdatabase", authorName: "draconisNZ"))
+        store.add(Tweet(uid: "12347", text: "this is a tweet storm about yapdatabase", authorName: "draconisNZ"))
+        
+        let results: [Tweet] = store.search(string: "'tweet NOT storm'")
+        XCTAssertEqual(results.count, 1)
+    }
+
+    func testSearchNear() {
+        tweetIndex()
+        
+        store.add(Tweet(uid: "12345", text: "@draconisNZ tweet and things about yapdatabase twitter storm", authorName: "twitter"))
+        store.add(Tweet(uid: "12346", text: "this is a tweet about storm yapdatabase", authorName: "draconisNZ"))
+        store.add(Tweet(uid: "12347", text: "this is a tweet storm about yapdatabase", authorName: "draconisNZ"))
+        
+        let results: [Tweet] = store.search(string: "'tweet NEAR/2 storm'")
+        XCTAssertEqual(results.count, 2)
+    }
+    
+    func textSearchAndResultSnippet() {
+        
     }
 
     

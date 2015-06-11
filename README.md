@@ -1,7 +1,7 @@
 # Data
 
 [![Build Status](https://travis-ci.org/DanBrooker/Data.svg?branch=master)](https://travis-ci.org/DanBrooker/Data)
-> Travis doesn't yet support Swift 1.2, the tests do pass however. See issue #1
+See issue
 
 Data is a Swift (1.2) framework for working with data models.
 > It uses YapDatabase and not CoreData
@@ -25,8 +25,7 @@ pod 'Data', git: 'https://github.com/DanBrooker/Data'
 
 ## Carthage
 
-Not yet, just waiting on YapDatabase to have a framework target
-https://github.com/yapstudios/YapDatabase/issues/131
+YapDatabase now has a framework, this needs to be tested
 
 ## Setup
 
@@ -220,22 +219,50 @@ store.index(example) { model in
 ```
 > Indexable types String, Int Double, Float, Bool
 
-## Find
+### Find
 
 ```swift
 var unique: TestModel? = store.find("enabled", value: true)
 ```
 
-## Filter
+### Filter
 
 ```swift
 var enabled: [TestModel] = store.filter("enabled", value: true)
 ```
 
+### Search
+
+sqlite full text search. [reference](http://www.sqlite.org/fts3.html#section_1_4)
+
+> You need to setup indexes to use search. Only searches **TEXT** columns
+
+```swift
+let example = Tweet(uid: "doesn't matter", text: "also doesn't matter", authorName: "anon")
+    store.index(example) { tweet in
+        return [
+            Index(key: "text", value: tweet.text),
+            Index(key: "authorName", value: tweet.authorName)
+        ]
+    }
+```
+
+Search using various methods
+```swift
+var results : [Tweet] = store.search(string: "yapdatabase")                 // Basic Keyword Search
+    results           = store.search(phrase: "yapdatabase is good")         // Exact Phrase
+    results           = store.search(string: "authorName:draconisNZ")       // Only Search Property
+    results           = store.search(string: "^yap")                        // Starts with
+    results           = store.search(string: "yap*"                         // Wildcard
+    results           = store.search(string: "'yapdatabase OR yapdatabse'") // OR
+    results           = store.search(string: "'tweet NOT storm'")           // NOT
+    results           = store.search(string: "'tweet NEAR/2 storm'")        // Keywords are with '2' tokens of each other
+```
+
 # TODO
 
 * Secondary index aggregation i.e. OR and AND
-* Full text search
+* Search snippets and return results across models if required
 * Relationships (Delete rules)
 * Metadata helpers for things like caching table row height
 * Tableview sections with Data<>

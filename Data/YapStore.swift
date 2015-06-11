@@ -10,8 +10,13 @@ import YapDatabase
 
 public class YapStore : Store {
     
-    let database: YapDatabase
     let name: String
+    let database: YapDatabase
+    var indexedFieldsByType = [String: [String]]()
+    var searchableFieldsByType = [String: [String]]()
+    
+    typealias SearchHandler = (dictionary: NSMutableDictionary, collection: String, key: String, object: AnyObject, metadata: AnyObject) -> Void
+    var searchableHandlers = [String: SearchHandler]()
     
     private let mainThreadConnection: YapDatabaseConnection
     public var connection: YapDatabaseConnection {
@@ -170,30 +175,45 @@ public class YapStore : Store {
         }
     }
     
-    // MARK: Indexing
+    // MARK: INDEXES
     
     /// Adding an index
     public func index<T: Model>(model : T, block: ((object: T) -> [Index])  ) {
         
         let setup = YapDatabaseSecondaryIndexSetup()
+        let type = NSStringFromClass(T)
         
         let indexes = block(object: model)
         if indexes.isEmpty {
             return
         }
         
+        if indexedFieldsByType[type] == nil {
+            indexedFieldsByType[type] = []
+        }
+        
+        if searchableFieldsByType[type] == nil {
+            searchableFieldsByType[type] = []
+        }
+        
         for index in indexes {
             switch(index.value) {
             case let double as Double:
                 setup.addColumn(index.key, withType: .Real)
+                indexedFieldsByType[type]?.append(index.key)
             case let float as Float:
                 setup.addColumn(index.key, withType: .Real)
+                indexedFieldsByType[type]?.append(index.key)
             case let int as Int:
                 setup.addColumn(index.key, withType: .Integer)
+                indexedFieldsByType[type]?.append(index.key)
             case let int as Bool:
                 setup.addColumn(index.key, withType: .Integer)
+                indexedFieldsByType[type]?.append(index.key)
             case let text as String:
                 setup.addColumn(index.key, withType: .Text)
+                indexedFieldsByType[type]?.append(index.key)
+                searchableFieldsByType[type]?.append(index.key)
             default:
                 println("Couldn't add index for \(index)")
                 return
@@ -210,8 +230,39 @@ public class YapStore : Store {
             }
         })
         let secondaryIndex = YapDatabaseSecondaryIndex(setup: setup, handler: handler)
+        searchableHandlers[type] = { dictionary, _collection, _key, object, _metadata in
+            if let model = object as? T {
+                for index in block(object: model) {
+                    if let value: AnyObject = index.value as? AnyObject {
+                        dictionary[index.key] = value
+                    }
+                }
+            }
+        }
         
-        database.registerExtension(secondaryIndex, withName: "\(NSStringFromClass(T))_index")
+        database.registerExtension(secondaryIndex, withName: "\(type)_index")
+        
+        var searchableFields = [String]()
+        for (key, value) in searchableFieldsByType {
+            for field in value {
+                searchableFields.append(field)
+            }
+        }
+        
+        if searchableFields.count > 0 {
+            println("searchable: \(searchableFields)")
+            let fts = YapDatabaseFullTextSearch(columnNames:searchableFields, handler: YapDatabaseFullTextSearchHandler.withObjectBlock({ (dictionary, _, _, object) in
+                
+                for (type, handler) in self.searchableHandlers {
+                    handler(dictionary: dictionary, collection: type, key: "", object: object, metadata: "")
+                    println("dict: \(dictionary)")
+                }
+                
+            }))
+            println("registered for FTS")
+            database.registerExtension(fts, withName: "fts")
+        }
+
     }
     
     public func find<T: Model>(key: String, value: Indexable) -> T? {
@@ -221,36 +272,12 @@ public class YapStore : Store {
         return nil
     }
     
-//    public func find<T: Model>(key: String, value: Bool) -> T? {
-//        return findModels([key: value]).first
-//    }
-//    
-//    public func find<T: Model>(key: String, value: Double) -> T? {
-//        return findModels([key: value]).first
-//    }
-//    
-//    public func find<T: Model>(key: String, value: Float) -> T? {
-//        return findModels([key: value]).first
-//    }
-    
     public func filter<T: Model>(key: String, value: Indexable) -> [T] {
         if let value: AnyObject = value as? AnyObject {
             return findModels([key: value])
         }
         return []
     }
-    
-//    public func filter<T: Model>(key: String, value: Bool) -> [T] {
-//        return findModels([key: value])
-//    }
-//    
-//    public func filter<T: Model>(key: String, value: Double) -> [T] {
-//        return findModels([key: value])
-//    }
-//    
-//    public func filter<T: Model>(key: String, value: Float) -> [T] {
-//        return findModels([key: value])
-//    }
 
     func findModels<T: Model>(queryHash: [String: AnyObject]) -> [T] {
         var query : YapDatabaseQuery? = nil
@@ -278,6 +305,28 @@ public class YapStore : Store {
         }
         
         return models
+    }
+    
+    // MARK: - SEARCH
+    
+    public func search<T: Model>(#string: String) -> [T] {
+        if searchableFieldsByType.count == 0 {
+            println("Cannot search before setting up indexes")
+            return []
+        }
+        var results = [T]()
+        connection.readWithBlock { transaction in
+            transaction.ext("fts").enumerateKeysAndObjectsMatching(string, usingBlock: { _, _, object, _ in // maybe don't always want objects, maybe only ids?
+                if let object = object as? T {
+                    results.append(object)
+                }
+            })
+        }
+        return results
+    }
+    
+    public func search<T: Model>(#phrase: String) -> [T] {
+        return search(string: "\"\(phrase)\"")
     }
     
 }

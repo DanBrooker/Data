@@ -9,6 +9,7 @@
 import Foundation
 
 public protocol Store {
+    
     // READ
     func all<T : Model>() -> [T]
     func find<T : Model>(id: String) -> T?
@@ -26,4 +27,8 @@ public protocol Store {
     func index<T: Model>(model : T, block: ((object: T) -> [Index]))
     func find<T: Model>(key: String, value: Indexable) -> T?
     func filter<T: Model>(key: String, value: Indexable) -> [T]
+    
+    // SEARCH
+    func search<T: Model>(#string: String) -> [T]
+    func search<T: Model>(#phrase: String) -> [T]
 }
