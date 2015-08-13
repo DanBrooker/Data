@@ -306,7 +306,7 @@ class YapStoreTests: XCTestCase {
         data.removeAtIndex(0)
         waitFor("delegate removed")
         
-        println("\(delegate.changes)")
+        print("\(delegate.changes)")
         
         if delegate.changes.count == 3 {
             XCTAssertEqual(delegate.changes[0], "add <0,0>", "")
@@ -320,7 +320,7 @@ class YapStoreTests: XCTestCase {
     
     func testSortedTableViewDelegate() {
         
-        let query = Query<TestModel>(window: 0...2, order: { $0.uid.toInt() < $1.uid.toInt() })
+        let query = Query<TestModel>(window: 0...2, order: {  Int($0.uid) < Int($1.uid) })
         let data = Data<TestModel>(query: query, store: store)
         
         let delegate = TableViewDelegate()
@@ -346,7 +346,7 @@ class YapStoreTests: XCTestCase {
         data.append(zero)
         waitFor("delegate added")
         
-        println("\(delegate.changes)")
+        print("\(delegate.changes)")
         
         XCTAssertEqual(data.count, 3)
         

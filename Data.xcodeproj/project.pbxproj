@@ -335,6 +335,8 @@
 		657BDEA11AB6734100068AF5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0620;
 				ORGANIZATIONNAME = "Nocturnal Code";
 				TargetAttributes = {

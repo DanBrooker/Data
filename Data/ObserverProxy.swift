@@ -6,7 +6,7 @@
 /// with Objective-C code.
 ///
 
-@objc class ObserverProxy {
+@objc class ObserverProxy : NSObject {
     
     var closure: (NSNotification) -> ();
     var name: String;
@@ -15,7 +15,7 @@
     init(name: String, closure: (NSNotification) -> ()) {
         self.closure = closure;
         self.name = name;
-        
+        super.init()
         self.start();
     }
     

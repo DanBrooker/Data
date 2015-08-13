@@ -29,6 +29,6 @@ public protocol Store {
     func filter<T: Model>(key: String, value: Indexable) -> [T]
     
     // SEARCH
-    func search<T: Model>(#string: String) -> [T]
-    func search<T: Model>(#phrase: String) -> [T]
+    func search<T: Model>(string string: String) -> [T]
+    func search<T: Model>(phrase phrase: String) -> [T]
 }

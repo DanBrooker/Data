@@ -19,13 +19,13 @@ public struct Query<T : Model> {
     let order: ( (a: T, b: T) -> Bool )?
 
     /**
-        Initializes a new bicycle with the provided parts and specifications.
+        Initializes a new Query for a Type
     
-        :param: filter Only include data that pass the filter i.e { $0.enabled == true }
-        :param: window Range of data required i.e 1...5 -> location 1, length 5
-        :param: order Set the sorting function i.e { $0.createdAt > $1.createdAt }
+        - parameter filter: Only include data that pass the filter i.e { $0.enabled == true }
+        - parameter window: Range of data required i.e 1...5 -> location 1, length 5
+        - parameter order: Set the sorting function i.e { $0.createdAt > $1.createdAt }
     
-        :returns: A query object.
+        - returns: A query object.
      */
     public init(filter: ( (a: T) -> Bool )? = nil, window: Range<Int>? = nil, order: ( (a: T, b: T) -> Bool )? = nil) {
         self.filter = filter
@@ -39,7 +39,7 @@ public struct Query<T : Model> {
         }
         
         if let order = order {
-            array.sort(order)
+            array.sortInPlace(order)
         }
         
         if let window = window {
@@ -77,12 +77,12 @@ public struct Query<T : Model> {
 //    }
 //}
 
-public class HasMany<T,U> {
-    
-//    let name: String
-    
-    public init<T: Model, U: Model>() {
-//        self.name = name
-    }
-    
-}
+//public class HasMany<T,U> {
+//    
+////    let name: String
+//    
+//    public init<T: Model, U: Model>() {
+////        self.name = name
+//    }
+//    
+//}

@@ -28,13 +28,13 @@ public class YapStore : Store {
     }
     
     public var path: String {
-        let dir = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
-        return dir.stringByAppendingPathComponent("\(name).yap")
+        let dir = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] 
+        return dir.stringByAppendingString("/\(name).yap")
     }
 
     public init(name: String = "database") {
-        let dir = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
-        let path = dir.stringByAppendingPathComponent("\(name).yap")
+        let dir = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] 
+        let path = dir.stringByAppendingString("/\(name).yap")
         
         self.name = name
         database = YapDatabase(path: path)
@@ -57,7 +57,7 @@ public class YapStore : Store {
                 
                 changes.enumerateObjectsUsingBlock({ change, _ in
                     if let change = change as? YapCollectionKey {
-                        let collection = change.collection
+//                        let collection = change.collection
                         let key = change.key
                         
                         if key == nil {
@@ -69,7 +69,7 @@ public class YapStore : Store {
             } else if let removed = dict["removedKeys"] as? YapSet {
                 removed.enumerateObjectsUsingBlock({ change, _ in
                     if let change = change as? YapCollectionKey {
-                        let collection = change.collection
+//                        let collection = change.collection
                         let key = change.key
                         NSNotificationCenter.defaultCenter().postNotificationName("dataStoreRemoved", object: nil, userInfo: ["id": key])
                     }
@@ -198,24 +198,24 @@ public class YapStore : Store {
         
         for index in indexes {
             switch(index.value) {
-            case let double as Double:
+            case _ as Double:
                 setup.addColumn(index.key, withType: .Real)
                 indexedFieldsByType[type]?.append(index.key)
-            case let float as Float:
+            case _ as Float:
                 setup.addColumn(index.key, withType: .Real)
                 indexedFieldsByType[type]?.append(index.key)
-            case let int as Int:
+            case _ as Int:
                 setup.addColumn(index.key, withType: .Integer)
                 indexedFieldsByType[type]?.append(index.key)
-            case let int as Bool:
+            case _ as Bool:
                 setup.addColumn(index.key, withType: .Integer)
                 indexedFieldsByType[type]?.append(index.key)
-            case let text as String:
+            case _ as String:
                 setup.addColumn(index.key, withType: .Text)
                 indexedFieldsByType[type]?.append(index.key)
                 searchableFieldsByType[type]?.append(index.key)
             default:
-                println("Couldn't add index for \(index)")
+                print("Couldn't add index for \(index)")
                 return
             }
         }
@@ -243,23 +243,23 @@ public class YapStore : Store {
         database.registerExtension(secondaryIndex, withName: "\(type)_index")
         
         var searchableFields = [String]()
-        for (key, value) in searchableFieldsByType {
+        for (_, value) in searchableFieldsByType {
             for field in value {
                 searchableFields.append(field)
             }
         }
         
         if searchableFields.count > 0 {
-            println("searchable: \(searchableFields)")
+            print("searchable: \(searchableFields)")
             let fts = YapDatabaseFullTextSearch(columnNames:searchableFields, handler: YapDatabaseFullTextSearchHandler.withObjectBlock({ (dictionary, _, _, object) in
                 
                 for (type, handler) in self.searchableHandlers {
                     handler(dictionary: dictionary, collection: type, key: "", object: object, metadata: "")
-                    println("dict: \(dictionary)")
+                    print("dict: \(dictionary)")
                 }
                 
             }))
-            println("registered for FTS")
+            print("registered for FTS")
             database.registerExtension(fts, withName: "fts")
         }
 
@@ -289,7 +289,7 @@ public class YapStore : Store {
         }
         
         if query == nil {
-            println("couldn't build query for \(queryHash)")
+            print("couldn't build query for \(queryHash)")
             return []
         }
         
@@ -309,9 +309,9 @@ public class YapStore : Store {
     
     // MARK: - SEARCH
     
-    public func search<T: Model>(#string: String) -> [T] {
+    public func search<T: Model>(string string: String) -> [T] {
         if searchableFieldsByType.count == 0 {
-            println("Cannot search before setting up indexes")
+            print("Cannot search before setting up indexes")
             return []
         }
         var results = [T]()
@@ -325,7 +325,7 @@ public class YapStore : Store {
         return results
     }
     
-    public func search<T: Model>(#phrase: String) -> [T] {
+    public func search<T: Model>(phrase phrase: String) -> [T] {
         return search(string: "\"\(phrase)\"")
     }
     

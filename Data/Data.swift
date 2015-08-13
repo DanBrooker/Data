@@ -47,14 +47,14 @@ public class Data<T: Model> : CollectionType {
         if let info = notification.userInfo {
             if let id = info["id"] as? String {
                 
-                if let index = find(temporalIds, id) {
+                if let index = temporalIds.indexOf(id) {
                     temporalIds.removeAtIndex(index)
                     return
                 }
                 
-                var obj : T? = datastore.find("\(id)")
+                let obj : T? = datastore.find("\(id)")
                 
-                if let index = find(dataIds, id) {
+                if let index = dataIds.indexOf(id) {
                     if let obj = obj {
 
                         self.data[index] = obj
@@ -80,12 +80,12 @@ public class Data<T: Model> : CollectionType {
         if let info = notification.userInfo {
             if let id = info["id"] as? String {
                 
-                if let index = find(temporalIds, id) {
+                if let index = temporalIds.indexOf(id) {
                     temporalIds.removeAtIndex(index)
                     return
                 }
                 
-                if let index = find(dataIds, id) {
+                if let index = dataIds.indexOf(id) {
                     
                     self.data.removeAtIndex(index)
                     self.dataIds.removeAtIndex(index)
@@ -156,7 +156,7 @@ public class Data<T: Model> : CollectionType {
     private func diff<S: Equatable>(a: [S], b: [S]) -> [S] {
         var d = [S]()
         for e in a {
-            if find(b, e) == nil {
+            if b.indexOf(e) == nil {
                 d.append(e)
             }
         }
@@ -167,35 +167,35 @@ public class Data<T: Model> : CollectionType {
     func reapply() {
         // begin
         delegate?.beginUpdates()
-        println("---- begin -----\n")
+//        println("---- begin -----\n")
         
         data = query.apply(data)
         let prevIds = dataIds
         let updatedIds = data.map({ $0.uid })
         
-        println("prev: \(prevIds)")
-        println("next: \(updatedIds)")
+//        println("prev: \(prevIds)")
+//        println("next: \(updatedIds)")
         
         // compare
         let newIds = diff(updatedIds, b: prevIds)
         let oldIds = diff(prevIds, b: updatedIds)
         
-        println("added \(newIds)")
-        println("removed: \(oldIds)")
+//        println("added \(newIds)")
+//        println("removed: \(oldIds)")
         
         delegate?.objectRemoved(oldIds.map({
-            let index = find(prevIds, $0)
+            let index = prevIds.indexOf($0)
             return NSIndexPath(forRow: index!, inSection: 0)
         }))
         
         delegate?.objectAdded(newIds.map({
-            let index = find(updatedIds, $0)
+            let index = updatedIds.indexOf($0)
             return NSIndexPath(forRow: index!, inSection: 0)
         }))
         
         // end
         delegate?.endUpdates()
-        println("\n---- end -----\n")
+//        println("\n---- end -----\n")
         
         dataIds = updatedIds
     }

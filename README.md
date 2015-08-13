@@ -1,10 +1,12 @@
-# Data
+# Data.swift
 
 [![Build Status](https://travis-ci.org/DanBrooker/Data.svg?branch=master)](https://travis-ci.org/DanBrooker/Data)
 See issue
 
-Data is a Swift (1.2) framework for working with data models.
-> It uses YapDatabase and not CoreData
+Data.swift is a Swift (2.0) framework for working with data models.
+> Data.swift is built on the fantastic YapDatabase which is built on Sqlite3
+
+`Swift 1.2 can be found on branch swift1.2`
 
 It aims to have the following attributes:
 * Threadsafe
@@ -25,7 +27,7 @@ pod 'Data', git: 'https://github.com/DanBrooker/Data'
 
 ## Carthage
 
-YapDatabase now has a framework, this needs to be tested
+YapDatabase now has a framework, I just need to add it :D
 
 ## Setup
 
