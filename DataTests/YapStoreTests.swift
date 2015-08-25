@@ -11,7 +11,7 @@ import Data
 
 let store = YapStore()
 
-class TestModel : NSObject, Model {
+class TestModel : Model {
     
     let uid: String
     let enabled: Bool
@@ -21,14 +21,22 @@ class TestModel : NSObject, Model {
         self.enabled = enabled
     }
     
-    required init(coder aDecoder: NSCoder) {
-        uid = aDecoder.decodeObjectForKey("uid") as! String
-        enabled =  aDecoder.decodeBoolForKey("enabled")
+    required init(archive: Archive) {
+        self.uid = archive["uid"] as! String
+        self.enabled = archive["enabled"] as! Bool
     }
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(uid, forKey: "uid")
-        aCoder.encodeBool(enabled, forKey: "enabled")
+    var archive : Archive {
+        return [
+            "uid": uid,
+            "enabled": enabled
+        ]
+    }
+    
+    func indexes() -> [Index] {
+        return [
+            Index(key: "enabled", value: enabled)
+        ]
     }
 }
 
@@ -36,7 +44,7 @@ func ==(lhs: TestModel, rhs: TestModel) -> Bool {
     return lhs.uid == rhs.uid
 }
 
-class Tweet : NSObject, Model {
+struct Tweet : Model {
     let uid: String
     let text: String
     let authorName: String
@@ -47,36 +55,48 @@ class Tweet : NSObject, Model {
         self.authorName = authorName
     }
     
-    required init(coder aDecoder: NSCoder) {
-        uid = aDecoder.decodeObjectForKey("uid") as! String
-        text = aDecoder.decodeObjectForKey("text") as! String
-        authorName = aDecoder.decodeObjectForKey("authorName") as! String
+    init(archive: Archive) {
+        self.uid = archive["uid"] as! String
+        self.text = archive["text"] as! String
+        self.authorName = archive["authorName"] as! String
     }
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(uid, forKey: "uid")
-        aCoder.encodeObject(text, forKey: "text")
-        aCoder.encodeObject(authorName, forKey: "authorName")
+    var archive : Archive {
+        return [
+            "uid": uid,
+            "text": text,
+            "authorName": authorName
+        ]
+    }
+    
+    func indexes() -> [Index] {
+        return [
+            Index(key: "text", value: text),
+            Index(key: "authorName", value: authorName)
+        ]
     }
 }
+
 
 func ==(lhs: Tweet, rhs: Tweet) -> Bool {
     return lhs.uid == rhs.uid
 }
 
-class TestB : NSObject, Model {
+class TestB : Model {
     let uid: String
     
     init(uid: String) {
         self.uid = uid
     }
     
-    required init(coder aDecoder: NSCoder) {
-        uid = aDecoder.decodeObjectForKey("uid") as! String
+    required init(archive: [String: AnyObject]) {
+        self.uid = archive["uid"] as! String
     }
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(uid, forKey: "uid")
+    var archive : [String: AnyObject] {
+        return [
+            "uid": uid
+        ]
     }
 }
 
@@ -118,7 +138,7 @@ class YapStoreTests: XCTestCase {
             store.add(TestModel(uid: "test-\(i)"))
         }
         
-        if let model : TestModel = store.find("test-5") {
+        if let _ : TestModel = store.find("test-5") {
             XCTAssert(true, "Found")
         } else {
             XCTAssert(true, "Model for id=test-5 not found")
@@ -398,35 +418,31 @@ class YapStoreTests: XCTestCase {
     func testSecondaryIndexFind() {
 
         let example = TestModel(uid: "doesn't matter")
-        store.index(example) { model in // this block is called initially to help build index and then later on saving to index the real values
-            return [
-                Index(key: "uid", value: model.uid),
-                Index(key: "enabled", value: model.enabled)
-            ]
-        }
+//        store.index(example) { model in // this block is called initially to help build index and then later on saving to index the real values
+//            return [
+//                Index(key: "uid", value: model.uid),
+//                Index(key: "enabled", value: model.enabled)
+//            ]
+//        }
+        store.index(example)
         
         store.add(TestModel(uid: "unique", enabled: true))
         
-        var unique: TestModel? = store.find("enabled", value: true) // Use an index if it exists, which in this case it does
+        let unique: TestModel? = store.find("enabled", value: true) // Use an index if it exists, which in this case it does
         XCTAssertNotNil(unique, "Should have found the object using the secondary index")
     }
     
     func testSecondaryIndexWhere() {
         
         let example = TestModel(uid: "doesn't matter")
-        store.index(example) { model in
-            return [
-                Index(key: "uid", value: model.uid),
-                Index(key: "enabled", value: model.enabled)
-            ]
-        }
+        store.index(example)
         
         store.add(TestModel(uid: "unique1", enabled: true))
         store.add(TestModel(uid: "unique2", enabled: true))
         store.add(TestModel(uid: "unique3", enabled: false))
         store.add(TestModel(uid: "unique4", enabled: false))
         
-        var enabled: [TestModel] = store.filter("enabled", value: true)
+        let enabled: [TestModel] = store.filter("enabled", value: true)
         XCTAssertEqual(enabled.count, 2)
     }
     
@@ -434,12 +450,12 @@ class YapStoreTests: XCTestCase {
     
     func tweetIndex() {
         let example = Tweet(uid: "doesn't matter", text: "also doesn't matter", authorName: "anon")
-        store.index(example) { tweet in
-            return [
-                Index(key: "text", value: tweet.text),
-                Index(key: "authorName", value: tweet.authorName)
-            ]
-        }
+        store.index(example)// { tweet in
+//            return [
+//                Index(key: "text", value: tweet.text),
+//                Index(key: "authorName", value: tweet.authorName)
+//            ]
+//        }
         
     }
     

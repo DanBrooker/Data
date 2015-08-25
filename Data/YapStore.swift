@@ -12,8 +12,8 @@ public class YapStore : Store {
     
     let name: String
     let database: YapDatabase
-    var indexedFieldsByType = [String: [String]]()
-    var searchableFieldsByType = [String: [String]]()
+    var indexedFieldsByType = [String: Set<String>]()
+    var searchableFieldsByType = [String: Set<String>]()
     
     typealias SearchHandler = (dictionary: NSMutableDictionary, collection: String, key: String, object: AnyObject, metadata: AnyObject) -> Void
     var searchableHandlers = [String: SearchHandler]()
@@ -57,7 +57,6 @@ public class YapStore : Store {
                 
                 changes.enumerateObjectsUsingBlock({ change, _ in
                     if let change = change as? YapCollectionKey {
-//                        let collection = change.collection
                         let key = change.key
                         
                         if key == nil {
@@ -69,7 +68,6 @@ public class YapStore : Store {
             } else if let removed = dict["removedKeys"] as? YapSet {
                 removed.enumerateObjectsUsingBlock({ change, _ in
                     if let change = change as? YapCollectionKey {
-//                        let collection = change.collection
                         let key = change.key
                         NSNotificationCenter.defaultCenter().postNotificationName("dataStoreRemoved", object: nil, userInfo: ["id": key])
                     }
@@ -83,20 +81,27 @@ public class YapStore : Store {
     public func all<T : Model>() -> [T] {
         var objects = [T]()
         connection.readWithBlock { transaction in
-//            if let transaction: YapDatabaseReadTransaction = transaction {
-                transaction.enumerateKeysInCollection(NSStringFromClass(T)) { key, _ in
-                    let object = transaction.objectForKey(key, inCollection: NSStringFromClass(T)) as! T
-                    objects.append(object as T)
-                }
-//            }
+            transaction.enumerateKeysInCollection(String(T)) { key, _ in
+                let archive = transaction.objectForKey(key, inCollection: String(T)) as! Archive
+                objects.append(T(archive: archive))
+            }
         }
         return objects
     }
     
     public func find<T : Model>(id: String) -> T? {
-        return objectForKey(id, collection: NSStringFromClass(T))
+        let collection = String(T)
+        var object : T? = nil
+        connection.readWithBlock { transaction in
+            if transaction.hasObjectForKey(id, inCollection: collection) {
+                if let archive = transaction.objectForKey(id, inCollection: collection) as? Archive {
+                    object = T(archive: archive)
+                }
+            }
+        }
+        return object
     }
-    
+
     public func filter<T : Model>(filter: (element: T) -> (Bool)) -> [T] {
         return all().filter(filter)
     }
@@ -105,7 +110,7 @@ public class YapStore : Store {
         var n = 0
         connection.readWithBlock { (transaction: YapDatabaseReadTransaction!) in
             if let transaction: YapDatabaseReadTransaction = transaction {
-                n = Int(transaction.numberOfKeysInCollection(NSStringFromClass(T)))
+                n = Int(transaction.numberOfKeysInCollection(String(T)))
             }
         }
         return n
@@ -115,29 +120,23 @@ public class YapStore : Store {
     
     public func add<T : Model>(object: T) {
         connection.readWriteWithBlock { transaction in
-//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
-                transaction.setObject(object, forKey:"\(object.uid)", inCollection: NSStringFromClass(T))
-//            }
+            transaction.setObject(object.archive, forKey:"\(object.uid)", inCollection: String(T))
         }
     }
     
     public func remove<T : Model>(object: T) {
         connection.readWriteWithBlock { transaction in
-//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
-                transaction.removeObjectForKey("\(object.uid)", inCollection: NSStringFromClass(T))
-//            }
+            transaction.removeObjectForKey("\(object.uid)", inCollection: String(T))
         }
     }
-    
+
     public func update<T : Model>(element: T) {
         add(element)
     }
-    
+
     public func truncate<T: Model>(klass: T.Type) {
         connection.readWriteWithBlock { transaction in
-//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
-                transaction.removeAllObjectsInCollection(NSStringFromClass(T))
-//            }
+            transaction.removeAllObjectsInCollection(String(T))
         }
     }
     
@@ -145,94 +144,97 @@ public class YapStore : Store {
         
         var objects = [T]()
         connection.readWithBlock { transaction in
-//            if let transaction: YapDatabaseReadTransaction = transaction {
-                transaction.enumerateKeysInCollection(NSStringFromClass(T)) { key, _ in
-                    let object = transaction.objectForKey(key, inCollection: NSStringFromClass(T)) as! T
-                    objects.append(object as T)
-                }
-//            }
+            transaction.enumerateKeysInCollection(String(T)) { key, _ in
+                let archive = transaction.objectForKey(key, inCollection: String(T)) as! Archive
+                objects.append(T(archive: archive))
+            }
         }
         return query.apply(objects)
     }
     
-    public func objectForKey<T>(key: String, collection: String = "") -> T? {
-        var obj : T? = nil
+    public func objectForKey<U>(key: String, collection: String = "") -> U? {
+        var obj : U? = nil
         connection.readWithBlock { transaction in
-//            if let transaction: YapDatabaseReadTransaction = transaction {
-                if transaction.hasObjectForKey(key, inCollection: collection) {
-                    obj = .Some(transaction.objectForKey(key, inCollection: collection) as! T)
-                }
-//            }
+            if transaction.hasObjectForKey(key, inCollection: collection) {
+                obj = .Some(transaction.objectForKey(key, inCollection: collection) as! U)
+            }
         }
         return obj
     }
     
     public func setObject(object: AnyObject, forKey key: String, collection: String = "") {
         connection.readWriteWithBlock { transaction in
-//            if let transaction: YapDatabaseReadWriteTransaction = transaction {
-                transaction.setObject(object, forKey:key, inCollection: collection)
-//            }
+            transaction.setObject(object, forKey:key, inCollection: collection)
         }
     }
-    
+
     // MARK: INDEXES
     
-    /// Adding an index
-    public func index<T: Model>(model : T, block: ((object: T) -> [Index])  ) {
+    
+    public func index<T: Model>(model : T) {
         
         let setup = YapDatabaseSecondaryIndexSetup()
-        let type = NSStringFromClass(T)
+        let type = String(T)
         
-        let indexes = block(object: model)
+        let indexes = model.indexes()
         if indexes.isEmpty {
             return
         }
         
+        print("\(model) indexes: \(indexes)")
+        
         if indexedFieldsByType[type] == nil {
-            indexedFieldsByType[type] = []
+            indexedFieldsByType[type] = Set<String>()
         }
         
         if searchableFieldsByType[type] == nil {
-            searchableFieldsByType[type] = []
+            searchableFieldsByType[type] = Set<String>()
         }
-        
+
         for index in indexes {
             switch(index.value) {
             case _ as Double:
                 setup.addColumn(index.key, withType: .Real)
-                indexedFieldsByType[type]?.append(index.key)
+                indexedFieldsByType[type]?.insert(index.key)
             case _ as Float:
                 setup.addColumn(index.key, withType: .Real)
-                indexedFieldsByType[type]?.append(index.key)
+                indexedFieldsByType[type]?.insert(index.key)
             case _ as Int:
                 setup.addColumn(index.key, withType: .Integer)
-                indexedFieldsByType[type]?.append(index.key)
+                indexedFieldsByType[type]?.insert(index.key)
             case _ as Bool:
                 setup.addColumn(index.key, withType: .Integer)
-                indexedFieldsByType[type]?.append(index.key)
+                indexedFieldsByType[type]?.insert(index.key)
             case _ as String:
                 setup.addColumn(index.key, withType: .Text)
-                indexedFieldsByType[type]?.append(index.key)
-                searchableFieldsByType[type]?.append(index.key)
+                indexedFieldsByType[type]?.insert(index.key)
+                searchableFieldsByType[type]?.insert(index.key)
             default:
                 print("Couldn't add index for \(index)")
                 return
             }
         }
         
-        let handler = YapDatabaseSecondaryIndexHandler.withRowBlock({ dictionary, _collection, _key, object, _metadata in
-            if let model = object as? T {
-                for index in block(object: model) {
+        let handler = YapDatabaseSecondaryIndexHandler.withRowBlock({ dictionary, collection, _key, object, _metadata in
+            if(collection == type) {
+                let archive = object as! Archive
+                let model = T(archive: archive)
+            
+                for index in model.indexes() {
                     if let value: AnyObject = index.value as? AnyObject {
                         dictionary[index.key] = value
                     }
                 }
+                print("indexed values: \(dictionary)")
             }
         })
         let secondaryIndex = YapDatabaseSecondaryIndex(setup: setup, handler: handler)
-        searchableHandlers[type] = { dictionary, _collection, _key, object, _metadata in
-            if let model = object as? T {
-                for index in block(object: model) {
+        searchableHandlers[type] = { dictionary, collection, _key, object, _metadata in
+            if collection == type {
+                let archive = object as! Archive
+                let model = T(archive: archive)
+                
+                for index in model.indexes() {
                     if let value: AnyObject = index.value as? AnyObject {
                         dictionary[index.key] = value
                     }
@@ -251,19 +253,108 @@ public class YapStore : Store {
         
         if searchableFields.count > 0 {
             print("searchable: \(searchableFields)")
-            let fts = YapDatabaseFullTextSearch(columnNames:searchableFields, handler: YapDatabaseFullTextSearchHandler.withObjectBlock({ (dictionary, _, _, object) in
+            let fts = YapDatabaseFullTextSearch(columnNames:searchableFields, handler: YapDatabaseFullTextSearchHandler.withObjectBlock({ (dictionary, collection, _, object) in
                 
                 for (type, handler) in self.searchableHandlers {
-                    handler(dictionary: dictionary, collection: type, key: "", object: object, metadata: "")
-                    print("dict: \(dictionary)")
+                    if type == collection {
+                        handler(dictionary: dictionary, collection: collection, key: "", object: object, metadata: "")
+                        print("dict: \(dictionary)")
+                    }
                 }
                 
             }))
             print("registered for FTS")
             database.registerExtension(fts, withName: "fts")
         }
-
     }
+    
+    /// Adding an index
+//    public func index<T: Model>(model : T, block: ((object: T) -> [Index])  ) {
+//        
+//        let setup = YapDatabaseSecondaryIndexSetup()
+//        let type = String(T)
+//        
+//        let indexes = block(object: model)
+//        if indexes.isEmpty {
+//            return
+//        }
+//        
+//        if indexedFieldsByType[type] == nil {
+//            indexedFieldsByType[type] = []
+//        }
+//        
+//        if searchableFieldsByType[type] == nil {
+//            searchableFieldsByType[type] = []
+//        }
+//        
+//        for index in indexes {
+//            switch(index.value) {
+//            case _ as Double:
+//                setup.addColumn(index.key, withType: .Real)
+//                indexedFieldsByType[type]?.append(index.key)
+//            case _ as Float:
+//                setup.addColumn(index.key, withType: .Real)
+//                indexedFieldsByType[type]?.append(index.key)
+//            case _ as Int:
+//                setup.addColumn(index.key, withType: .Integer)
+//                indexedFieldsByType[type]?.append(index.key)
+//            case _ as Bool:
+//                setup.addColumn(index.key, withType: .Integer)
+//                indexedFieldsByType[type]?.append(index.key)
+//            case _ as String:
+//                setup.addColumn(index.key, withType: .Text)
+//                indexedFieldsByType[type]?.append(index.key)
+//                searchableFieldsByType[type]?.append(index.key)
+//            default:
+//                print("Couldn't add index for \(index)")
+//                return
+//            }
+//        }
+//        
+//        let handler = YapDatabaseSecondaryIndexHandler.withRowBlock({ dictionary, _collection, _key, object, _metadata in
+//            if let model = object as? T {
+//                for index in block(object: model) {
+//                    if let value: AnyObject = index.value as? AnyObject {
+//                        dictionary[index.key] = value
+//                    }
+//                }
+//            }
+//        })
+//        let secondaryIndex = YapDatabaseSecondaryIndex(setup: setup, handler: handler)
+//        searchableHandlers[type] = { dictionary, _collection, _key, object, _metadata in
+//            if let model = object as? T {
+//                for index in block(object: model) {
+//                    if let value: AnyObject = index.value as? AnyObject {
+//                        dictionary[index.key] = value
+//                    }
+//                }
+//            }
+//        }
+//        
+//        database.registerExtension(secondaryIndex, withName: "\(type)_index")
+//        
+//        var searchableFields = [String]()
+//        for (_, value) in searchableFieldsByType {
+//            for field in value {
+//                searchableFields.append(field)
+//            }
+//        }
+//        
+//        if searchableFields.count > 0 {
+//            print("searchable: \(searchableFields)")
+//            let fts = YapDatabaseFullTextSearch(columnNames:searchableFields, handler: YapDatabaseFullTextSearchHandler.withObjectBlock({ (dictionary, _, _, object) in
+//                
+//                for (type, handler) in self.searchableHandlers {
+//                    handler(dictionary: dictionary, collection: type, key: "", object: object, metadata: "")
+//                    print("dict: \(dictionary)")
+//                }
+//                
+//            }))
+//            print("registered for FTS")
+//            database.registerExtension(fts, withName: "fts")
+//        }
+//
+//    }
     
     public func find<T: Model>(key: String, value: Indexable) -> T? {
         if let value: AnyObject = value as? AnyObject {
@@ -281,7 +372,7 @@ public class YapStore : Store {
 
     func findModels<T: Model>(queryHash: [String: AnyObject]) -> [T] {
         var query : YapDatabaseQuery? = nil
-        if let key = queryHash.keys.first { //
+        if let key = queryHash.keys.first {
             
             if let value: AnyObject = queryHash[key] {
                 query = YapDatabaseQuery.queryWithFormat("WHERE \(key) = ?", (value as! NSObject))
@@ -295,11 +386,12 @@ public class YapStore : Store {
         
         var models = [T]()
         connection.readWithBlock { transaction in
-            let index = transaction.ext("\(NSStringFromClass(T))_index") as! YapDatabaseSecondaryIndexTransaction
+            let index = transaction.ext("\(String(T))_index") as! YapDatabaseSecondaryIndexTransaction
             
-            index.enumerateKeysAndObjectsMatchingQuery(query, usingBlock: { _, _, object, _ in
-                if let object = object as? T {
-                    models.append(object)
+            index.enumerateKeysAndObjectsMatchingQuery(query, usingBlock: { collection, _uid, object, _ in
+                print("\(collection) == \(String(T))")
+                if let archive = object as? Archive where collection == String(T) {
+                    models.append(T(archive: archive))
                 }
             })
         }
@@ -316,9 +408,9 @@ public class YapStore : Store {
         }
         var results = [T]()
         connection.readWithBlock { transaction in
-            transaction.ext("fts").enumerateKeysAndObjectsMatching(string, usingBlock: { _, _, object, _ in // maybe don't always want objects, maybe only ids?
-                if let object = object as? T {
-                    results.append(object)
+            transaction.ext("fts").enumerateKeysAndObjectsMatching(string, usingBlock: { collection, _, object, _ in // maybe don't always want objects, maybe only ids?
+                if let archive = object as? Archive where collection == String(T) {
+                    results.append(T(archive: archive))
                 }
             })
         }

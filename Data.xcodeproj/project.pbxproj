@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		2D99DBEF290E07565A0C9A65 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62E8DFEFBB05C4DEF32CBAFC /* Pods_Example.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		65120A651B8C0E630033069B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEDF1AB7EFD800068AF5 /* AppDelegate.swift */; };
+		65120A661B8C0E660033069B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEE11AB7EFD800068AF5 /* ViewController.swift */; };
+		65120A671B8C10210033069B /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDF011AB8F0BF00068AF5 /* Query.swift */; };
+		65120A681B8C10230033069B /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEFF1AB8F0A100068AF5 /* Data.swift */; };
 		6533CF201B082E42002C7FD3 /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6533CF1F1B082E42002C7FD3 /* Index.swift */; };
 		657BDEB01AB6734100068AF5 /* Data.h in Headers */ = {isa = PBXBuildFile; fileRef = 657BDEAF1AB6734100068AF5 /* Data.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		657BDEB61AB6734100068AF5 /* Data.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 657BDEAA1AB6734100068AF5 /* Data.framework */; };
@@ -15,13 +19,9 @@
 		657BDECA1AB6735E00068AF5 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEC71AB6735E00068AF5 /* Store.swift */; };
 		657BDECD1AB6EC3500068AF5 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDECC1AB6EC3500068AF5 /* Model.swift */; };
 		657BDED01AB6EF8B00068AF5 /* YapStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDECF1AB6EF8B00068AF5 /* YapStoreTests.swift */; };
-		657BDEE01AB7EFD800068AF5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEDF1AB7EFD800068AF5 /* AppDelegate.swift */; };
-		657BDEE21AB7EFD800068AF5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEE11AB7EFD800068AF5 /* ViewController.swift */; };
 		657BDEE51AB7EFD800068AF5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 657BDEE31AB7EFD800068AF5 /* Main.storyboard */; };
 		657BDEE71AB7EFD800068AF5 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 657BDEE61AB7EFD800068AF5 /* Images.xcassets */; };
 		657BDEEA1AB7EFD800068AF5 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 657BDEE81AB7EFD800068AF5 /* LaunchScreen.xib */; };
-		657BDF001AB8F0A100068AF5 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDEFF1AB8F0A100068AF5 /* Data.swift */; };
-		657BDF021AB8F0BF00068AF5 /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDF011AB8F0BF00068AF5 /* Query.swift */; };
 		657BDF0C1ABAE7B400068AF5 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657BDF0B1ABAE7B400068AF5 /* Message.swift */; };
 		659DBB681AC4DABD003CB923 /* ObserverProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659DBB671AC4DABD003CB923 /* ObserverProxy.swift */; };
 		65CB15021ACA2E0700F5074F /* Data.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 657BDEAA1AB6734100068AF5 /* Data.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -541,13 +541,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				657BDF021AB8F0BF00068AF5 /* Query.swift in Sources */,
+				65120A681B8C10230033069B /* Data.swift in Sources */,
 				6533CF201B082E42002C7FD3 /* Index.swift in Sources */,
 				657BDECD1AB6EC3500068AF5 /* Model.swift in Sources */,
 				657BDEC81AB6735E00068AF5 /* YapStore.swift in Sources */,
 				657BDECA1AB6735E00068AF5 /* Store.swift in Sources */,
+				65120A671B8C10210033069B /* Query.swift in Sources */,
 				659DBB681AC4DABD003CB923 /* ObserverProxy.swift in Sources */,
-				657BDF001AB8F0A100068AF5 /* Data.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -563,9 +563,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				65120A661B8C0E660033069B /* ViewController.swift in Sources */,
+				65120A651B8C0E630033069B /* AppDelegate.swift in Sources */,
 				657BDF0C1ABAE7B400068AF5 /* Message.swift in Sources */,
-				657BDEE21AB7EFD800068AF5 /* ViewController.swift in Sources */,
-				657BDEE01AB7EFD800068AF5 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -20,6 +20,14 @@ public struct Index {
     }
 }
 
+public class Indexed {
+    let value: Indexable
+    
+    public init(_ value: Indexable) {
+        self.value = value
+    }
+}
+
 extension Int : Indexable {
 }
 

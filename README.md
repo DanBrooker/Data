@@ -36,25 +36,42 @@ Import Data module
 import Data
 ```
 
-> Models must conform to Data.Model which includes NSCoding and a uid:String property
-
+> Data.Model is simple protocol which requires a uid:String property and a means to archive and unarchive an object
 
 ``` swift
-class YourModel : NSObject : Data.Model {
+class YourModel : Data.Model {
   let uid: String   // Required property
 
   init() {
     self.uid = "A UID OF YOUR CHOOSING"
   }
 
-  required init(coder aDecoder: NSCoder) {
-    self.uid = aDecoder.decodeObjectForKey("uid") as String
-    //....
+  // Required init
+  required init(archive: Archive) {
+    uid = archive["uid"] as! String
   }
 
-  func encodeWithCoder(aCoder: NSCoder) {
-    aCoder.encodeObject(uid, forKey: "uid")
-    //.....
+  // Required archive property, [String: AnyObject]
+  var archive : Archive {
+      return ["uid": uid]
+  }
+}
+
+struct YourStruct : Data.Model {
+  let uid: String   // Required property
+
+  init() {
+    self.uid = "A UID OF YOUR CHOOSING"
+  }
+
+  // Required init
+  init(archive: Archive) {
+    uid = archive["uid"] as! String
+  }
+
+  // Required archive property, [String: AnyObject]
+  var archive : Archive {
+      return ["uid": uid]
   }
 }
 ```
@@ -211,13 +228,22 @@ let object : ObjectType = store.objectForKey("key")
 
 Setup Indexes, once per model
 ```swift
-let example = TestModel(uid: "doesn't matter")
-store.index(example) { model in
-    return [
-        Index(key: "uid", value: model.uid),
-        Index(key: "enabled", value: model.enabled)
-    ]
+struct TestModel: Data.Model {
+
+  let text: String
+
+  //.. init and archive functions removed for this example
+
+  // function used to index properties
+  func indexes() -> [Index] {
+      return [
+          Index(key: "text", value: text)
+      ]
+  }
 }
+
+let example = TestModel(uid: "doesn't matter")
+store.index(example)
 ```
 > Indexable types String, Int Double, Float, Bool
 
@@ -240,13 +266,24 @@ sqlite full text search. [reference](http://www.sqlite.org/fts3.html#section_1_4
 > You need to setup indexes to use search. Only searches **TEXT** columns
 
 ```swift
+struct Tweet: Data.Model {
+
+  let text: String
+  let authorName: String
+
+  //.. init and archive functions removed for this example
+
+  // function used to index properties
+  func indexes() -> [Index] {
+      return [
+          Index(key: "text", value: text),
+          Index(key: "authorName", value: authorName)
+      ]
+  }
+}
+
 let example = Tweet(uid: "doesn't matter", text: "also doesn't matter", authorName: "anon")
-    store.index(example) { tweet in
-        return [
-            Index(key: "text", value: tweet.text),
-            Index(key: "authorName", value: tweet.authorName)
-        ]
-    }
+store.index(example)
 ```
 
 Search using various methods

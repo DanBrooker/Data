@@ -167,21 +167,14 @@ public class Data<T: Model> : CollectionType {
     func reapply() {
         // begin
         delegate?.beginUpdates()
-//        println("---- begin -----\n")
         
         data = query.apply(data)
         let prevIds = dataIds
         let updatedIds = data.map({ $0.uid })
         
-//        println("prev: \(prevIds)")
-//        println("next: \(updatedIds)")
-        
         // compare
         let newIds = diff(updatedIds, b: prevIds)
         let oldIds = diff(prevIds, b: updatedIds)
-        
-//        println("added \(newIds)")
-//        println("removed: \(oldIds)")
         
         delegate?.objectRemoved(oldIds.map({
             let index = prevIds.indexOf($0)
@@ -195,7 +188,6 @@ public class Data<T: Model> : CollectionType {
         
         // end
         delegate?.endUpdates()
-//        println("\n---- end -----\n")
         
         dataIds = updatedIds
     }

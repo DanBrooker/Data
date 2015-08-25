@@ -16,7 +16,7 @@ func generateUID() -> String {
     return "<0x\(counter)>"
 }
 
-class Message : NSObject, Model {
+class Message : Model {
 
     let uid: String
     var text: String
@@ -26,14 +26,25 @@ class Message : NSObject, Model {
         self.uid = generateUID()
     }
     
-    required init(coder aDecoder: NSCoder) {
-        self.uid = aDecoder.decodeObjectForKey("uid") as! String
-        self.text = aDecoder.decodeObjectForKey("text") as! String
+//    required init(coder aDecoder: NSCoder) {
+//        self.uid = aDecoder.decodeObjectForKey("uid") as! String
+//        self.text = aDecoder.decodeObjectForKey("text") as! String
+//    }
+//    
+//    func encodeWithCoder(aCoder: NSCoder) {
+//        aCoder.encodeObject(uid, forKey: "uid")
+//        aCoder.encodeObject(text, forKey: "text")
+//    }
+    required init(archive: [String: AnyObject]) {
+        self.uid = archive["uid"] as! String
+        self.text = archive["text"] as! String
     }
     
-    func encodeWithCoder(aCoder: NSCoder) {
-        aCoder.encodeObject(uid, forKey: "uid")
-        aCoder.encodeObject(text, forKey: "text")
+    var archive : [String: AnyObject] {
+        return [
+            "uid": uid,
+            "text": text
+        ]
     }
     
 }
