@@ -267,7 +267,7 @@ class YapStoreTests: XCTestCase {
     
     func testDataAdd() {
         let query = Query<TestModel>()
-        let data = Data<TestModel>(query: query, store: store)
+        let data = Collection<TestModel>(query: query, store: store)
         
         data.append(TestModel(uid: "test-data-add"))
         
@@ -278,7 +278,7 @@ class YapStoreTests: XCTestCase {
     func testDataBackgroundAdd() {
         
         let query = Query<TestModel>()
-        let data = Data<TestModel>(query: query, store: store)
+        let data = Collection<TestModel>(query: query, store: store)
         
         store.add(TestModel(uid: "test-data-add"))
         
@@ -291,7 +291,7 @@ class YapStoreTests: XCTestCase {
     func testDataBackgroundRemove() {
         
         let query = Query<TestModel>()
-        let data = Data<TestModel>(query: query, store: store)
+        let data = Collection<TestModel>(query: query, store: store)
         
         let model = TestModel(uid: "test-data-remove")
         data.append(model)
@@ -309,7 +309,7 @@ class YapStoreTests: XCTestCase {
     func testTableViewDelegate() {
         
         let query = Query<TestModel>()
-        let data = Data<TestModel>(query: query, store: store)
+        let data = Collection<TestModel>(query: query, store: store)
         
         let delegate = TableViewDelegate()
         
@@ -341,7 +341,7 @@ class YapStoreTests: XCTestCase {
     func testSortedTableViewDelegate() {
         
         let query = Query<TestModel>(window: 0...2, order: {  Int($0.uid) < Int($1.uid) })
-        let data = Data<TestModel>(query: query, store: store)
+        let data = Collection<TestModel>(query: query, store: store)
         
         let delegate = TableViewDelegate()
         
@@ -570,7 +570,7 @@ class YapStoreTests: XCTestCase {
         waitForExpectationsWithTimeout(timeout, handler: nil)
     }
     
-    class TableViewDelegate : DataDelegate {
+    class TableViewDelegate : CollectionDelegate {
         
         var updates = 0
         var changes = [String]()

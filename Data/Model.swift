@@ -27,3 +27,7 @@ public extension Model {
     }
     
 }
+
+func ==<T: Model>(lhs: T, rhs: T) -> Bool {
+    return lhs.uid == rhs.uid
+}

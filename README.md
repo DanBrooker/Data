@@ -166,22 +166,22 @@ a) You can observe the following notifications for changes
 * "dataStoreModified"
 * "dataStoreRemoved"
 
-b) And this is the best option use `Data<T>` collections
+b) And this is the best option use `Collection<T>` collections
 
 ## Collections
 
-`Data<T>` is a drop in replacement for Array<T> with the added benefit of being persistent and automatically updating when someone changes an object in the underlying data store
+`Collection<T>` is a drop in replacement for Array<T> with the added benefit of being persistent and automatically updating when someone changes an object in the underlying data store
 
 ```swift
 let query = Query<YourModel>()
-let data: Data<YourModel> = Data(query: query, store: store)
+let data: Collection<YourModel> = Data(query: query, store: store)
 ```
 
-See querying above for more information about populating `Data<T>` with a query
+See querying above for more information about populating `Collection<T>` with a query
 
 ### Tableview helpers
 
-`Data<T>` has a delegate `DataDelegate` and it generates some very useful callbacks for `UITableView`s
+`Collection<T>` has a delegate `DataDelegate` and it generates some very useful callbacks for `UITableView`s
 
 ```swift
 extension ViewController: DataDelegate {
@@ -304,7 +304,7 @@ var results : [Tweet] = store.search(string: "yapdatabase")                 // B
 * Search snippets and return results across models if required
 * Relationships (Delete rules)
 * Metadata helpers for things like caching table row height
-* Tableview sections with Data<>
+* Tableview sections with Collection<>
 * Data syncing - CloudKit, Dropbox ...
 
 # License

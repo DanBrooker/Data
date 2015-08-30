@@ -7,7 +7,7 @@
 //
 
 ///
-public protocol DataDelegate {
+public protocol CollectionDelegate {
     func beginUpdates()
     func endUpdates()
     func objectAdded(indexPaths: [NSIndexPath])
@@ -16,7 +16,7 @@ public protocol DataDelegate {
 }
 
 ///
-public class Data<T: Model> : CollectionType {
+public class Collection<T: Model> : CollectionType {
     
     typealias Element = T
     
@@ -28,7 +28,7 @@ public class Data<T: Model> : CollectionType {
     let datastore : Store
     
     ///
-    public var delegate : DataDelegate?
+    public var delegate : CollectionDelegate?
     
     var removedProxy: ObserverProxy?
     var modifiedProxy: ObserverProxy?
@@ -205,7 +205,7 @@ public class Data<T: Model> : CollectionType {
 }
 
 // MARK: UITableViewDataSource Compat
-extension Data {
+extension Collection {
     
     ///
     public func removeAtIndexPath(indexPath: NSIndexPath) {
