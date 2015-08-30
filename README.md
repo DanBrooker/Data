@@ -1,7 +1,10 @@
 # Data.swift
 
 [![Build Status](https://travis-ci.org/DanBrooker/Data.svg?branch=master)](https://travis-ci.org/DanBrooker/Data)
-See issue
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+![Cocoapods Compatible](https://img.shields.io/cocoapods/v/Data.swift.svg)
+![License](https://img.shields.io/badge/license-MIT-000000.svg)
+![Platform](https://img.shields.io/badge/platform-iOS-lightgrey.svg)
 
 Data.swift is a Swift (2.0) framework for working with data models.
 > Data.swift is built on the fantastic YapDatabase which is built on Sqlite3
