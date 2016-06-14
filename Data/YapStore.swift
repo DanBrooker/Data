@@ -23,6 +23,7 @@ public class YapStore : Store {
         if NSThread.isMainThread() {
             return mainThreadConnection
         } else {
+            // FIXME: safe but a little heavy handed (slow)
             return database.newConnection()
         }
     }
@@ -42,7 +43,7 @@ public class YapStore : Store {
         self.mainThreadConnection = database.newConnection()
         
         NSNotificationCenter.defaultCenter().addObserver(self,
-            selector:"modified:",
+            selector:#selector(YapStore.modified(_:)),
             name:YapDatabaseModifiedNotification,
             object:database)
     }
@@ -170,7 +171,6 @@ public class YapStore : Store {
 
     // MARK: INDEXES
     
-    
     public func index<T: Model>(model : T) {
         
         let setup = YapDatabaseSecondaryIndexSetup()
@@ -267,94 +267,6 @@ public class YapStore : Store {
             database.registerExtension(fts, withName: "fts")
         }
     }
-    
-    /// Adding an index
-//    public func index<T: Model>(model : T, block: ((object: T) -> [Index])  ) {
-//        
-//        let setup = YapDatabaseSecondaryIndexSetup()
-//        let type = String(T)
-//        
-//        let indexes = block(object: model)
-//        if indexes.isEmpty {
-//            return
-//        }
-//        
-//        if indexedFieldsByType[type] == nil {
-//            indexedFieldsByType[type] = []
-//        }
-//        
-//        if searchableFieldsByType[type] == nil {
-//            searchableFieldsByType[type] = []
-//        }
-//        
-//        for index in indexes {
-//            switch(index.value) {
-//            case _ as Double:
-//                setup.addColumn(index.key, withType: .Real)
-//                indexedFieldsByType[type]?.append(index.key)
-//            case _ as Float:
-//                setup.addColumn(index.key, withType: .Real)
-//                indexedFieldsByType[type]?.append(index.key)
-//            case _ as Int:
-//                setup.addColumn(index.key, withType: .Integer)
-//                indexedFieldsByType[type]?.append(index.key)
-//            case _ as Bool:
-//                setup.addColumn(index.key, withType: .Integer)
-//                indexedFieldsByType[type]?.append(index.key)
-//            case _ as String:
-//                setup.addColumn(index.key, withType: .Text)
-//                indexedFieldsByType[type]?.append(index.key)
-//                searchableFieldsByType[type]?.append(index.key)
-//            default:
-//                print("Couldn't add index for \(index)")
-//                return
-//            }
-//        }
-//        
-//        let handler = YapDatabaseSecondaryIndexHandler.withRowBlock({ dictionary, _collection, _key, object, _metadata in
-//            if let model = object as? T {
-//                for index in block(object: model) {
-//                    if let value: AnyObject = index.value as? AnyObject {
-//                        dictionary[index.key] = value
-//                    }
-//                }
-//            }
-//        })
-//        let secondaryIndex = YapDatabaseSecondaryIndex(setup: setup, handler: handler)
-//        searchableHandlers[type] = { dictionary, _collection, _key, object, _metadata in
-//            if let model = object as? T {
-//                for index in block(object: model) {
-//                    if let value: AnyObject = index.value as? AnyObject {
-//                        dictionary[index.key] = value
-//                    }
-//                }
-//            }
-//        }
-//        
-//        database.registerExtension(secondaryIndex, withName: "\(type)_index")
-//        
-//        var searchableFields = [String]()
-//        for (_, value) in searchableFieldsByType {
-//            for field in value {
-//                searchableFields.append(field)
-//            }
-//        }
-//        
-//        if searchableFields.count > 0 {
-//            print("searchable: \(searchableFields)")
-//            let fts = YapDatabaseFullTextSearch(columnNames:searchableFields, handler: YapDatabaseFullTextSearchHandler.withObjectBlock({ (dictionary, _, _, object) in
-//                
-//                for (type, handler) in self.searchableHandlers {
-//                    handler(dictionary: dictionary, collection: type, key: "", object: object, metadata: "")
-//                    print("dict: \(dictionary)")
-//                }
-//                
-//            }))
-//            print("registered for FTS")
-//            database.registerExtension(fts, withName: "fts")
-//        }
-//
-//    }
     
     public func find<T: Model>(key: String, value: Indexable) -> T? {
         if let value: AnyObject = value as? AnyObject {

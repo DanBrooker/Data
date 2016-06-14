@@ -29,7 +29,7 @@
     }
     
     func start() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"handler:", name:name, object: object);
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(ObserverProxy.handler(_:)), name:name, object: object);
     }
     
     func stop() {

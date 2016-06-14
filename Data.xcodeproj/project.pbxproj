@@ -97,6 +97,7 @@
 		657BDEFF1AB8F0A100068AF5 /* Collection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		657BDF011AB8F0BF00068AF5 /* Query.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 		657BDF0B1ABAE7B400068AF5 /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		659D7A391BA2569300BAFDB4 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		659DBB671AC4DABD003CB923 /* ObserverProxy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObserverProxy.swift; sourceTree = "<group>"; };
 		6A7BD7C08009935B02BBCCC2 /* Pods-DataTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DataTests/Pods-DataTests.debug.xcconfig"; sourceTree = "<group>"; };
 		74260877D6A11C6ECC11D881 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
@@ -153,6 +154,7 @@
 		657BDEA01AB6734100068AF5 = {
 			isa = PBXGroup;
 			children = (
+				659D7A391BA2569300BAFDB4 /* README.md */,
 				657BDEAC1AB6734100068AF5 /* Data */,
 				657BDEB91AB6734100068AF5 /* Tests */,
 				657BDEDC1AB7EFD800068AF5 /* Example */,

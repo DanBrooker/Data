@@ -33,7 +33,8 @@ public struct Query<T : Model> {
         self.order = order
     }
     
-    func apply(var array: [T]) -> [T] {
+    func apply( array: [T]) -> [T] {
+        var array = array
         if let filter = filter {
             array = array.filter(filter)
         }

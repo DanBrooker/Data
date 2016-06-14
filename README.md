@@ -298,16 +298,20 @@ var results : [Tweet] = store.search(string: "yapdatabase")                 // B
     results           = store.search(string: "yap*"                         // Wildcard
     results           = store.search(string: "'yapdatabase OR yapdatabse'") // OR
     results           = store.search(string: "'tweet NOT storm'")           // NOT
-    results           = store.search(string: "'tweet NEAR/2 storm'")        // Keywords are with '2' tokens of each other
+    results           = store.search(string: "'tweet NEAR/2 storm'")        // Keywords are within '2' tokens of each other
 ```
 
 # TODO
 
+* Transactions and mutiple model reads/writes
 * Secondary index aggregation i.e. OR and AND
+* iOS9 Core Spotlight 
+* Query<T> should use indexes
+* Relationships (Delete rules), Implicit and Explict
+
 * Search snippets and return results across models if required
-* Relationships (Delete rules)
 * Metadata helpers for things like caching table row height
-* Tableview sections with Collection<>
+* Tableview sections with Collection<>, also CollectionView
 * Data syncing - CloudKit, Dropbox ...
 
 # License

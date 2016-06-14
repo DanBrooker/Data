@@ -11,7 +11,7 @@ import Data
 
 func generateUID() -> String {
     var counter = NSUserDefaults.standardUserDefaults().integerForKey("generateCounter")
-    counter++
+    counter += 1
     NSUserDefaults.standardUserDefaults().setInteger(counter, forKey: "generateCounter")
     return "<0x\(counter)>"
 }

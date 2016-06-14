@@ -576,11 +576,11 @@ class YapStoreTests: XCTestCase {
         var changes = [String]()
         
         func beginUpdates() {
-            updates++
+            updates += 1
         }
         
         func endUpdates() {
-            updates--
+            updates -= 1
         }
         
         func objectAdded(indexPaths: [NSIndexPath]) {
