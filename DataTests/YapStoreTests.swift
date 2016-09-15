@@ -28,8 +28,8 @@ class TestModel : Model {
     
     var archive : Archive {
         return [
-            "uid": uid,
-            "enabled": enabled
+            "uid": uid as AnyObject,
+            "enabled": enabled as AnyObject
         ]
     }
     
@@ -63,9 +63,9 @@ struct Tweet : Model {
     
     var archive : Archive {
         return [
-            "uid": uid,
-            "text": text,
-            "authorName": authorName
+            "uid": uid as AnyObject,
+            "text": text as AnyObject,
+            "authorName": authorName as AnyObject
         ]
     }
     
@@ -95,7 +95,7 @@ class TestB : Model {
     
     var archive : [String: AnyObject] {
         return [
-            "uid": uid
+            "uid": uid as AnyObject
         ]
     }
 }
@@ -114,7 +114,7 @@ class YapStoreTests: XCTestCase {
     override func tearDown() {
         store.truncate(TestModel.self)
         store.truncate(Tweet.self)
-        waitFor("Truncating Notifications")
+        waitFor(name: "Truncating Notifications")
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
@@ -196,16 +196,16 @@ class YapStoreTests: XCTestCase {
         
         XCTAssert(filtered.count == 10, "Should have 10 model objects but was \(filtered.count))")
         
-        let filterLimitedQuery = Query<TestModel>(window: 0..<5, filter: {
+        let filterLimitedQuery = Query<TestModel>(filter: {
             return $0.uid.hasPrefix("find")
-        })
+            }, window: 0..<5)
         let filteredLimited = store.query(filterLimitedQuery)
         
         XCTAssert(filteredLimited.count == 5, "Should have 5 model objects but was \(filteredLimited.count))")
         
-        let filterLimited2Query = Query<TestModel>(window: 0..<20, filter: {
+        let filterLimited2Query = Query<TestModel>(filter: {
             return !$0.uid.hasPrefix("find")
-        })
+            }, window: 0..<20)
         let filteredLimited2 = store.query(filterLimited2Query)
         
         XCTAssert(filteredLimited2.count != 20, "Should have not have 20 model objects but was \(filteredLimited2.count))")
@@ -282,7 +282,7 @@ class YapStoreTests: XCTestCase {
         
         store.add(TestModel(uid: "test-data-add"))
         
-        waitFor("Background Thread")
+        waitFor(name: "Background Thread")
         
         XCTAssert(store.count(TestModel.self) == 1, "Should have only 1 model but was \(store.count(TestModel.self))")
         XCTAssert(data.count == 1, "Should have 1 model but was \(data.count)")
@@ -298,7 +298,7 @@ class YapStoreTests: XCTestCase {
         
         store.remove(model)
         
-        waitFor("Background Thread")
+        waitFor(name: "Background Thread")
         
         XCTAssert(store.count(TestModel.self) == 0, "Should have 0 models but was \(store.count(TestModel.self))")
         XCTAssert(data.count == 0, "Should have 0 models but was \(data.count)")
@@ -318,13 +318,13 @@ class YapStoreTests: XCTestCase {
         let zero = TestModel(uid: "0")
         
         data.append(zero)
-        waitFor("delegate added")
+        waitFor(name: "delegate added")
         
         store.update(zero)
-        waitFor("delegate updated")
+        waitFor(name: "delegate updated")
         
         data.removeAtIndex(0)
-        waitFor("delegate removed")
+        waitFor(name: "delegate removed")
         
         print("\(delegate.changes)")
         
@@ -340,7 +340,7 @@ class YapStoreTests: XCTestCase {
     
     func testSortedTableViewDelegate() {
         
-        let query = Query<TestModel>(window: 0...2, order: {  Int($0.uid) < Int($1.uid) })
+        let query = Query<TestModel>(window: 0..<2, order: {  Int($0.uid)! < Int($1.uid)! })
         let data = Collection<TestModel>(query: query, store: store)
         
         let delegate = TableViewDelegate()
@@ -356,15 +356,15 @@ class YapStoreTests: XCTestCase {
         data.append(one)
         data.append(zero)
         data.append(two)
-        waitFor("delegate added")
+        waitFor(name: "delegate added")
         
         data.removeAtIndex(0)
-        waitFor("delegate removed")
+        waitFor(name: "delegate removed")
         
         data.append(four)
         data.append(three)
         data.append(zero)
-        waitFor("delegate added")
+        waitFor(name: "delegate added")
         
         print("\(delegate.changes)")
         
@@ -562,40 +562,40 @@ class YapStoreTests: XCTestCase {
     
     // MARK: - Private
     
-    func waitFor(name: String, timeout: NSTimeInterval = 1) {
-        let expectation = expectationWithDescription(name)
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(timeout)), dispatch_get_main_queue(), { () -> () in
-            expectation.fulfill()
-        })
-        waitForExpectationsWithTimeout(timeout, handler: nil)
+    func waitFor(name: String, timeout: TimeInterval = 1) {
+        let expect = expectation(description: name)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
+            expect.fulfill()
+        }
+        waitForExpectations(timeout: timeout, handler: nil)
     }
     
     class TableViewDelegate : CollectionDelegate {
-        
         var updates = 0
         var changes = [String]()
         
-        func beginUpdates() {
+        public func beginUpdates() {
             updates += 1
         }
         
-        func endUpdates() {
+        public func endUpdates() {
             updates -= 1
         }
         
-        func objectAdded(indexPaths: [NSIndexPath]) {
+        public func objectAdded(_ indexPaths: [IndexPath]) {
             for indexPath in indexPaths {
                 changes.append("add <\(indexPath.row),\(indexPath.section)>")
             }
         }
         
-        func objectRemoved(indexPaths: [NSIndexPath]) {
+        public func objectRemoved(_ indexPaths: [IndexPath]) {
             for indexPath in indexPaths {
                 changes.append("remove <\(indexPath.row),\(indexPath.section)>")
             }
         }
         
-        func objectUpdated(indexPaths: [NSIndexPath]) {
+        public func objectUpdated(_ indexPaths: [IndexPath]) {
             for indexPath in indexPaths {
                 changes.append("update <\(indexPath.row),\(indexPath.section)>")
             }

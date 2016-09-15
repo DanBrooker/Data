@@ -10,13 +10,13 @@
 public struct Query<T : Model> {
     
     /// Where condition
-    let filter: ( (element: T) -> Bool )?
+    let filter: ( (_ element: T) -> Bool )?
     
     /// Limit number of results and initial offset
-    let window: Range<Int>?
+    let window: CountableRange<Int>?
     
     /// Sort order
-    let order: ( (a: T, b: T) -> Bool )?
+    let order: ( (_ a: T, _ b: T) -> Bool )?
 
     /**
         Initializes a new Query for a Type
@@ -27,25 +27,25 @@ public struct Query<T : Model> {
     
         - returns: A query object.
      */
-    public init(filter: ( (a: T) -> Bool )? = nil, window: Range<Int>? = nil, order: ( (a: T, b: T) -> Bool )? = nil) {
+    public init(filter: ( (_ a: T) -> Bool )? = nil, window: CountableRange<Int>? = nil, order: ( (_ a: T, _ b: T) -> Bool )? = nil) {
         self.filter = filter
         self.window = window
         self.order = order
     }
     
-    func apply( array: [T]) -> [T] {
+    func apply( _ array: [T]) -> [T] {
         var array = array
         if let filter = filter {
             array = array.filter(filter)
         }
         
         if let order = order {
-            array.sortInPlace(order)
+            array.sort(by: order)
         }
         
         if let window = window {
-            if window.endIndex > array.count {
-                array = Array(array[window.startIndex..<array.count])
+            if window.upperBound > array.count {
+                array = Array(array[window.lowerBound..<array.count])
             } else {
                 array = Array(array[window])
             }

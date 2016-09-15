@@ -20,7 +20,7 @@ public struct Index {
     }
 }
 
-public class Indexed {
+open class Indexed {
     let value: Indexable
     
     public init(_ value: Indexable) {

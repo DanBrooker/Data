@@ -8,18 +8,18 @@
 
 @objc class ObserverProxy : NSObject {
     
-    var closure: (NSNotification) -> ();
+    var closure: (Notification) -> ();
     var name: String;
     var object: AnyObject?;
     
-    init(name: String, closure: (NSNotification) -> ()) {
+    init(name: String, closure: @escaping (Notification) -> ()) {
         self.closure = closure;
         self.name = name;
         super.init()
         self.start();
     }
     
-    convenience init(name: String, object: AnyObject, closure: (NSNotification) -> ()) {
+    convenience init(name: String, object: AnyObject, closure: @escaping (Notification) -> ()) {
         self.init(name: name, closure: closure);
         self.object = object;
     }
@@ -29,14 +29,14 @@
     }
     
     func start() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(ObserverProxy.handler(_:)), name:name, object: object);
+        NotificationCenter.default.addObserver(self, selector:#selector(ObserverProxy.handler(_:)), name:NSNotification.Name(rawValue: name), object: object);
     }
     
     func stop() {
-        NSNotificationCenter.defaultCenter().removeObserver(self);
+        NotificationCenter.default.removeObserver(self);
     }
     
-    func handler(notification: NSNotification) {
+    func handler(_ notification: Notification) {
         closure(notification);
     }
 }

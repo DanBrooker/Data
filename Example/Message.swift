@@ -10,9 +10,9 @@ import Foundation
 import Data
 
 func generateUID() -> String {
-    var counter = NSUserDefaults.standardUserDefaults().integerForKey("generateCounter")
+    var counter = UserDefaults.standard.integer(forKey: "generateCounter")
     counter += 1
-    NSUserDefaults.standardUserDefaults().setInteger(counter, forKey: "generateCounter")
+    UserDefaults.standard.set(counter, forKey: "generateCounter")
     return "<0x\(counter)>"
 }
 
@@ -42,8 +42,8 @@ class Message : Model {
     
     var archive : [String: AnyObject] {
         return [
-            "uid": uid,
-            "text": text
+            "uid": uid as AnyObject,
+            "text": text as AnyObject
         ]
     }
     

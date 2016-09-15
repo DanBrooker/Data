@@ -10,14 +10,13 @@
 public protocol CollectionDelegate {
     func beginUpdates()
     func endUpdates()
-    func objectAdded(indexPaths: [NSIndexPath])
-    func objectRemoved(indexPaths: [NSIndexPath])
-    func objectUpdated(indexPaths: [NSIndexPath])
+    func objectAdded(_ indexPaths: [IndexPath])
+    func objectRemoved(_ indexPaths: [IndexPath])
+    func objectUpdated(_ indexPaths: [IndexPath])
 }
 
 ///
-public class Collection<T: Model> : CollectionType {
-    
+open class Collection<T> : Swift.Collection where T:Model {
     typealias Element = T
     
     var data = [T]()
@@ -28,7 +27,7 @@ public class Collection<T: Model> : CollectionType {
     let datastore : Store
     
     ///
-    public var delegate : CollectionDelegate?
+    open var delegate : CollectionDelegate?
     
     var removedProxy: ObserverProxy?
     var modifiedProxy: ObserverProxy?
@@ -43,27 +42,27 @@ public class Collection<T: Model> : CollectionType {
         modifiedProxy = ObserverProxy(name: "dataStoreModified", closure: databaseModified)
     }
     
-    func databaseModified(notification: NSNotification) {
-        if let info = notification.userInfo {
+    func databaseModified(_ notification: Notification) {
+        if let info = (notification as NSNotification).userInfo {
             if let id = info["id"] as? String {
                 
-                if let index = temporalIds.indexOf(id) {
-                    temporalIds.removeAtIndex(index)
+                if let index = temporalIds.index(of: id) {
+                    temporalIds.remove(at: index)
                     return
                 }
                 
                 let obj : T? = datastore.find("\(id)")
                 
-                if let index = dataIds.indexOf(id) {
+                if let index = dataIds.index(of: id) {
                     if let obj = obj {
 
                         self.data[index] = obj
-                        delegate?.objectUpdated([NSIndexPath(forRow: index, inSection: 0)])
+                        delegate?.objectUpdated([IndexPath(row: index, section: 0)])
                     }
                 } else if let obj = obj {
 
                     if let filter = query.filter {
-                        if !filter(element: obj) {
+                        if !filter(obj) {
                             return
                         }
                     }
@@ -76,21 +75,21 @@ public class Collection<T: Model> : CollectionType {
         }
     }
     
-    func databaseRemoved(notification: NSNotification) {
-        if let info = notification.userInfo {
+    func databaseRemoved(_ notification: Notification) {
+        if let info = (notification as NSNotification).userInfo {
             if let id = info["id"] as? String {
                 
-                if let index = temporalIds.indexOf(id) {
-                    temporalIds.removeAtIndex(index)
+                if let index = temporalIds.index(of: id) {
+                    temporalIds.remove(at: index)
                     return
                 }
                 
-                if let index = dataIds.indexOf(id) {
+                if let index = dataIds.index(of: id) {
                     
-                    self.data.removeAtIndex(index)
-                    self.dataIds.removeAtIndex(index)
+                    self.data.remove(at: index)
+                    self.dataIds.remove(at: index)
                 
-                    delegate?.objectRemoved([NSIndexPath(forRow: index, inSection: 0)])
+                    delegate?.objectRemoved([IndexPath(row: index, section: 0)])
                 }
             }
         }
@@ -100,24 +99,33 @@ public class Collection<T: Model> : CollectionType {
         data = datastore.query(query)
     }
     
-    public var startIndex: Int {
+    open var startIndex: Int {
         return data.startIndex
     }
     
-    public var endIndex: Int {
+    open var endIndex: Int {
         return data.endIndex
     }
     
-    public subscript (index: Int) -> T {
+    open subscript (index: Int) -> T {
         return data[index]
     }
     
-    public func generate() -> IndexingGenerator<[T]> {
-        return data.generate()
+    open func makeIterator() -> IndexingIterator<[T]> {
+        return data.makeIterator()
+    }
+    
+    /// Returns the position immediately after the given index.
+    ///
+    /// - Parameter i: A valid index of the collection. `i` must be less than
+    ///   `endIndex`.
+    /// - Returns: The index value immediately after `i`.
+    public func index(after i: Int) -> Int {
+        return data.index(after: i)
     }
     
     ///
-    public func append(newElement: T) {
+    open func append(_ newElement: T) {
         data.append(newElement)
         temporalIds.append(newElement.uid)
         datastore.add(newElement)
@@ -126,7 +134,7 @@ public class Collection<T: Model> : CollectionType {
     }
     
     ///
-    public func appendAll(newElements: [T]) {
+    open func appendAll(_ newElements: [T]) {
         
         for element in newElements {
             data.append(element)
@@ -138,8 +146,8 @@ public class Collection<T: Model> : CollectionType {
     }
     
     ///
-    public func removeAtIndex(index: Int) -> T {
-        let removed = data.removeAtIndex(index)
+    open func removeAtIndex(_ index: Int) -> T {
+        let removed = data.remove(at: index)
         temporalIds.append(removed.uid)
         datastore.remove(removed)
         
@@ -148,15 +156,15 @@ public class Collection<T: Model> : CollectionType {
     }
     
     ///
-    public func update(element: T) {
+    open func update(_ element: T) {
         datastore.update(element)
         reapply()
     }
     
-    private func diff<S: Equatable>(a: [S], b: [S]) -> [S] {
+    fileprivate func diff<S: Equatable>(_ a: [S], b: [S]) -> [S] {
         var d = [S]()
         for e in a {
-            if b.indexOf(e) == nil {
+            if b.index(of: e) == nil {
                 d.append(e)
             }
         }
@@ -177,13 +185,13 @@ public class Collection<T: Model> : CollectionType {
         let oldIds = diff(prevIds, b: updatedIds)
         
         delegate?.objectRemoved(oldIds.map({
-            let index = prevIds.indexOf($0)
-            return NSIndexPath(forRow: index!, inSection: 0)
+            let index = prevIds.index(of: $0)
+            return IndexPath(row: index!, section: 0)
         }))
         
         delegate?.objectAdded(newIds.map({
-            let index = updatedIds.indexOf($0)
-            return NSIndexPath(forRow: index!, inSection: 0)
+            let index = updatedIds.index(of: $0)
+            return IndexPath(row: index!, section: 0)
         }))
         
         // end
@@ -193,12 +201,12 @@ public class Collection<T: Model> : CollectionType {
     }
     
     ///
-    public var isEmpty: Bool {
+    open var isEmpty: Bool {
         return data.count == 0
     }
     
     ///
-    public var count: Int {
+    open var count: Int {
         return data.count
     }
     
@@ -208,18 +216,18 @@ public class Collection<T: Model> : CollectionType {
 extension Collection {
     
     ///
-    public func removeAtIndexPath(indexPath: NSIndexPath) {
+    public func removeAtIndexPath(_ indexPath: IndexPath) -> T {
         // ignore section, this Data Type doesn't handle sections
-        removeAtIndex(indexPath.row)
+        return removeAtIndex((indexPath as NSIndexPath).row)
     }
     
     ///
-    public subscript(indexPath: NSIndexPath) -> T {
-        return data[indexPath.row]
+    public subscript(indexPath: IndexPath) -> T {
+        return data[(indexPath as NSIndexPath).row]
     }
     
     ///
-    public func numberOfRowsInSection(section: Int) -> Int {
+    public func numberOfRowsInSection(_ section: Int) -> Int {
         return data.count
     }
 }
